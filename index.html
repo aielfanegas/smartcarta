@@ -220,13 +220,13 @@
 
   <!-- FLOATING FABs : bottom-left (waiter / bill) -->
   <div style="position:absolute;left:14px;bottom:18px;display:flex;flex-direction:column;gap:10px;align-items:flex-start;z-index:30">
-    <button onClick="{{ callWaiter }}" style="display:flex;align-items:center;gap:8px;height:46px;padding:0 16px;border-radius:30px;background:var(--surface,#fff);color:var(--text);border:1px solid var(--border,#e8e0d4);box-shadow:0 4px 12px rgba(0,0,0,.14);cursor:pointer;font-family:inherit;font-weight:600;font-size:13px;white-space:nowrap">{{ icBell }}<span>{{ txt.waiter }}</span></button>
-    <button onClick="{{ requestBill }}" style="display:flex;align-items:center;gap:8px;height:46px;padding:0 16px;border-radius:30px;background:var(--surface,#fff);color:var(--text);border:1px solid var(--border,#e8e0d4);box-shadow:0 4px 12px rgba(0,0,0,.14);cursor:pointer;font-family:inherit;font-weight:600;font-size:13px;white-space:nowrap">{{ icReceipt }}<span>{{ txt.bill }}</span></button>
+    <button onClick="{{ callWaiter }}" aria-label="{{ txt.waiter }}" style="{{ waiterFabStyle }}">{{ icBell }}<sc-if value="{{ waiterArmed }}"><span>{{ txt.waiter }}</span></sc-if></button>
+    <button onClick="{{ requestBill }}" aria-label="{{ txt.bill }}" style="{{ billFabStyle }}">{{ icReceipt }}<sc-if value="{{ billArmed }}"><span>{{ txt.bill }}</span></sc-if></button>
   </div>
 
   <!-- FLOATING FABs : bottom-right (smartwaiter / cart) -->
   <div style="position:absolute;right:14px;bottom:18px;display:flex;flex-direction:column;gap:11px;align-items:flex-end;z-index:30">
-    <button onClick="{{ openChat }}" style="display:flex;align-items:center;gap:8px;background:var(--accent2,#d4694a);color:#fff;border:none;border-radius:30px;padding:12px 17px;font-weight:700;font-size:14px;box-shadow:0 6px 20px rgba(0,0,0,.22);cursor:pointer;font-family:inherit">{{ icSpark }}SmartWaiter</button>
+    <button onClick="{{ openChat }}" aria-label="SmartWaiter" style="{{ chatFabStyle }}">{{ icSpark }}<sc-if value="{{ chatArmed }}"><span>SmartWaiter</span></sc-if></button>
     <button onClick="{{ openCart }}" aria-label="{{ txt.cart }}" style="position:relative;width:56px;height:56px;border-radius:50%;background:var(--accent,#127a86);color:var(--accentText,#fff);border:none;box-shadow:0 6px 20px rgba(0,0,0,.22);display:grid;place-items:center;cursor:pointer">{{ icCart }}<sc-if value="{{ hasCart }}"><span style="position:absolute;top:-3px;right:-3px;background:var(--accent2,#d4694a);color:#fff;min-width:22px;height:22px;border-radius:11px;font-size:12px;font-weight:800;display:grid;place-items:center;padding:0 6px;border:2px solid var(--bg,#f7f3ec)">{{ cartCount }}</span></sc-if></button>
   </div>
 
@@ -562,7 +562,7 @@ class Component extends DCLogic {
       cart:{}, cartOpen:false, orderConfirmed:false,
       modal:null, chatOpen:false, settingsOpen:false,
       chat:[{role:'bot', key:'greet'}], chatInput:'', toast:null,
-      story:{}, cols:2,
+      story:{}, cols:2, fab:null,
       cartStep:1, delivery:'table', tableNo:'', special:'', custName:'', custEmail:'', custPhone:'',
       currency:'EUR', currencyOpen:false
     };
@@ -890,7 +890,12 @@ class Component extends DCLogic {
       labelStyle:{fontSize:'13px',fontWeight:600,marginBottom:'6px',display:'block'},
       sectionTitleStyle:{fontSize:'12px',fontWeight:700,color:'var(--muted,#8a8275)',textTransform:'uppercase',letterSpacing:'.05em',marginBottom:'10px'},
       // fabs
-      callWaiter:()=>this.showToast(T.waiterToast), requestBill:()=>this.showToast(T.billToast),
+      callWaiter:()=> S.fab==='waiter' ? (this.showToast(T.waiterToast), this.setState({fab:null})) : this.setState({fab:'waiter'}),
+      requestBill:()=> S.fab==='bill' ? (this.showToast(T.billToast), this.setState({fab:null})) : this.setState({fab:'bill'}),
+      waiterArmed: S.fab==='waiter', billArmed: S.fab==='bill', chatArmed: S.fab==='chat',
+      waiterFabStyle: (S.fab==='waiter'?'height:46px;padding:0 16px;border-radius:30px;gap:8px;':'width:46px;height:46px;padding:0;border-radius:50%;justify-content:center;')+'display:flex;align-items:center;background:var(--surface,#fff);color:var(--text);border:1px solid var(--border,#e8e0d4);box-shadow:0 4px 12px rgba(0,0,0,.14);cursor:pointer;font-family:inherit;font-weight:600;font-size:13px;white-space:nowrap;transition:width .18s ease,padding .18s ease,border-radius .18s ease',
+      billFabStyle: (S.fab==='bill'?'height:46px;padding:0 16px;border-radius:30px;gap:8px;':'width:46px;height:46px;padding:0;border-radius:50%;justify-content:center;')+'display:flex;align-items:center;background:var(--surface,#fff);color:var(--text);border:1px solid var(--border,#e8e0d4);box-shadow:0 4px 12px rgba(0,0,0,.14);cursor:pointer;font-family:inherit;font-weight:600;font-size:13px;white-space:nowrap;transition:width .18s ease,padding .18s ease,border-radius .18s ease',
+      chatFabStyle: (S.fab==='chat'?'padding:12px 17px;border-radius:30px;gap:8px;':'width:52px;height:52px;padding:0;border-radius:50%;justify-content:center;')+'display:flex;align-items:center;background:var(--accent2,#d4694a);color:#fff;border:none;box-shadow:0 6px 20px rgba(0,0,0,.22);cursor:pointer;font-family:inherit;font-weight:700;font-size:14px;white-space:nowrap;transition:all .18s ease',
       openInfo:()=>this.showToast(T.infoToast),
       // header controls
       toggleTheme:()=>this.setState(s=>({theme:s.theme==='light'?'dark':'light'})),
@@ -907,7 +912,7 @@ class Component extends DCLogic {
       // modal
       modal, closeModal:()=>this.setState({modal:null}),
       // chat
-      chatOpen:S.chatOpen, openChat:()=>this.setState({chatOpen:true, _cl:S.chat.length}), closeChat:()=>this.setState({chatOpen:false}),
+      chatOpen:S.chatOpen, openChat:()=> S.fab==='chat' ? this.setState({fab:null, chatOpen:true, _cl:S.chat.length}) : this.setState({fab:'chat'}), closeChat:()=>this.setState({chatOpen:false}),
       chatMsgs, chatChips, chatInput:S.chatInput, onChatInput:e=>this.setState({chatInput:e.target.value}), submitChat:(e)=>{ e.preventDefault(); this.sendText(); },
       // settings
       settingsOpen:S.settingsOpen, openSettings:()=>this.setState({settingsOpen:true}), closeSettings:()=>this.setState({settingsOpen:false}),
