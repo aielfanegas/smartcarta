@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<style>
+  html,body{margin:0;height:100%}
+  *{box-sizing:border-box}
+  @keyframes scIn{from{opacity:0}to{opacity:1}}
+  @keyframes scUp{from{transform:translateY(16px);opacity:0}to{transform:translateY(0);opacity:1}}
+  @keyframes scSheet{from{transform:translateY(100%)}to{transform:translateY(0)}}
+  @keyframes scPop{from{transform:scale(.95);opacity:0}to{transform:scale(1);opacity:1}}
+  @keyframes scToast{from{transform:translate(-50%,-14px);opacity:0}to{transform:translate(-50%,0);opacity:1}}
+  @keyframes scMedia{from{opacity:.35}to{opacity:1}}
+  @keyframes scZoom{from{transform:scale(1)}to{transform:scale(1.14)}}
+  ::-webkit-scrollbar{width:0;height:0}
+  .scx::-webkit-scrollbar{display:none}
+  button:focus-visible,input:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--accent,#127a86);outline-offset:2px}
+</style>
+</helmet>
+<div ref="{{ rootRef }}" role="application" aria-label="{{ txt.appLabel }}" style="position:relative;height:100dvh;display:flex;flex-direction:column;overflow:hidden;background:var(--bg,#f7f3ec);color:var(--text,#2a2722);font-family:Manrope,system-ui,-apple-system,sans-serif;line-height:1.45;-webkit-font-smoothing:antialiased">
+
+  <div class="scx" style="flex:1;overflow-y:auto;overflow-x:hidden">
+
+    <!-- HERO -->
+    <div style="position:relative">
+      <div style="{{ heroStyle }}">
+        <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.12),rgba(0,0,0,.05) 40%,rgba(0,0,0,0))"></div>
+      </div>
+      <div style="margin:-44px 16px 0;position:relative;background:var(--surface,#fff);border:1px solid var(--border,#e8e0d4);border-radius:20px;padding:18px 18px 16px;box-shadow:0 6px 22px rgba(0,0,0,.07)">
+        <h1 style="margin:0;font-family:'DM Serif Display',Georgia,serif;font-size:30px;line-height:1.05;letter-spacing:-.01em">{{ brand }}</h1>
+        <p style="margin:6px 0 12px;color:var(--muted,#8a8275);font-size:14px">{{ txt.claim }}</p>
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+          <span style="display:inline-flex;align-items:center;gap:5px;background:var(--surface2,#f1ece2);padding:6px 11px;border-radius:20px;font-weight:700;font-size:13px"><span style="color:var(--star,#e0a93b);display:inline-flex">{{ icStar }}</span>4.8</span>
+          <span style="color:var(--muted,#8a8275);font-size:13px">{{ txt.reviews }}</span>
+          <button onClick="{{ openInfo }}" style="margin-left:auto;display:inline-flex;align-items:center;gap:6px;background:none;border:1px solid var(--border,#e8e0d4);color:var(--text);padding:7px 13px;border-radius:20px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">{{ icInfo }}{{ txt.info }}</button>
+        </div>
+      </div>
+      <div style="position:absolute;top:14px;right:14px;display:flex;align-items:center;gap:7px;flex-wrap:wrap;justify-content:flex-end;max-width:calc(100% - 28px);z-index:10">
+        <div style="display:flex;align-items:center;height:32px;background:rgba(255,255,255,.9);border-radius:20px;padding:0 3px;gap:2px;box-shadow:0 1px 4px rgba(0,0,0,.12)">
+          <button onClick="{{ onEs }}" aria-label="Español" aria-pressed="{{ esActive }}" style="{{ esBtnStyle }}"><span style="{{ flagEs }}"></span></button>
+          <button onClick="{{ onEn }}" aria-label="English" aria-pressed="{{ enActive }}" style="{{ enBtnStyle }}"><span style="{{ flagEn }}"></span></button>
+        </div>
+        <div style="position:relative">
+          <button onClick="{{ toggleCurrency }}" aria-label="Divisa" aria-expanded="{{ currencyOpen }}" style="display:flex;align-items:center;gap:5px;height:32px;padding:0 9px;border-radius:20px;background:rgba(255,255,255,.9);border:none;cursor:pointer;color:#2a2722;box-shadow:0 1px 4px rgba(0,0,0,.12);font-family:inherit;font-weight:800;font-size:12px"><span>{{ curSym }}</span><span>{{ curCode }}</span><span style="display:inline-flex;transition:transform .15s;transform:{{ curChevron }}">{{ icChevron }}</span></button>
+          <sc-if value="{{ currencyOpen }}">
+            <div style="position:absolute;top:38px;right:0;z-index:20;background:var(--surface,#fff);border:1px solid var(--border,#e8e0d4);border-radius:14px;box-shadow:0 8px 24px rgba(0,0,0,.2);padding:6px;min-width:170px;animation:scUp .15s ease">
+              <sc-for list="{{ currencyOpts }}" as="c">
+                <button onClick="{{ c.onClick }}" aria-pressed="{{ c.active }}" style="{{ c.style }}"><span style="width:18px;text-align:center;font-weight:800">{{ c.sym }}</span><span style="flex:1;text-align:left">{{ c.name }}</span><span style="width:18px;display:inline-flex;justify-content:center;color:var(--accent,#127a86)"><sc-if value="{{ c.active }}">{{ c.check }}</sc-if></span></button>
+              </sc-for>
+            </div>
+          </sc-if>
+        </div>
+        <a href="{{ googleHref }}" target="_blank" rel="noopener" aria-label="Google review" style="display:flex;align-items:center;gap:5px;height:32px;padding:0 10px;border-radius:20px;background:rgba(255,255,255,.9);text-decoration:none;color:#2a2722;box-shadow:0 1px 4px rgba(0,0,0,.12);font-family:inherit;font-weight:700;font-size:12px"><span style="color:var(--star,#e0a93b);display:inline-flex">{{ icStarSm }}</span><span>{{ txt.reviewBtn }}</span></a>
+        <button onClick="{{ toggleTheme }}" aria-label="{{ txt.theme }}" style="width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,.9);border:none;display:grid;place-items:center;cursor:pointer;color:#2a2722;box-shadow:0 1px 4px rgba(0,0,0,.12)">{{ icTheme }}</button>
+        <button onClick="{{ openSettings }}" aria-label="{{ txt.settings }}" style="width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,.9);border:none;display:grid;place-items:center;cursor:pointer;color:#2a2722;box-shadow:0 1px 4px rgba(0,0,0,.12)">{{ icTune }}</button>
+      </div>
+    </div>
+
+    <!-- SEARCH + ALLERGENS -->
+    <div style="padding:18px 16px 0">
+      <div style="{{ searchRowStyle }}">
+        <div style="{{ searchCellStyle }}">
+          <div style="position:relative;display:flex;align-items:center">
+            <span style="position:absolute;left:14px;color:var(--muted,#8a8275);display:inline-flex;pointer-events:none">{{ icSearch }}</span>
+            <input value="{{ search }}" onChange="{{ onSearch }}" placeholder="{{ txt.search }}" aria-label="{{ txt.search }}" style="width:100%;padding:13px 14px 13px 42px;border-radius:14px;border:1px solid var(--border,#e8e0d4);background:var(--surface,#fff);color:var(--text);font-size:15px;font-family:inherit" />
+            <sc-if value="{{ hasSearch }}"><button onClick="{{ clearSearch }}" aria-label="{{ txt.closeAria }}" style="position:absolute;right:8px;width:30px;height:30px;border-radius:50%;border:none;background:var(--surface2,#f1ece2);color:var(--muted);display:grid;place-items:center;cursor:pointer">{{ icX }}</button></sc-if>
+          </div>
+        </div>
+        <div style="{{ allergenCellStyle }}">
+          <button onClick="{{ toggleAllergenPanel }}" aria-expanded="{{ allergenOpen }}" style="{{ allergenBtnStyle }}">{{ icShield }}<span>{{ txt.allergens }}</span><sc-if value="{{ hasExcluded }}"><span style="background:var(--accent2,#d4694a);color:#fff;font-size:11px;font-weight:700;min-width:20px;height:20px;border-radius:10px;display:grid;place-items:center;padding:0 5px">{{ excludedCount }}</span></sc-if><span style="margin-left:auto;color:var(--muted);display:inline-flex;transform:{{ chevronT }}">{{ icChevron }}</span></button>
+        </div>
+      </div>
+      <sc-if value="{{ allergenOpen }}">
+        <div style="margin-top:10px;background:var(--surface2,#f1ece2);border:1px solid var(--border,#e8e0d4);border-radius:14px;padding:13px;animation:scUp .2s ease">
+          <div style="font-size:13px;color:var(--muted,#8a8275);margin-bottom:10px;font-weight:600">{{ txt.allergenTitle }}</div>
+          <div style="display:flex;flex-wrap:wrap;gap:7px">
+            <sc-for list="{{ allergenChips }}" as="a" hint-placeholder-count="14">
+              <button onClick="{{ a.onClick }}" aria-pressed="{{ a.excluded }}" style="{{ a.style }}">{{ a.label }}</button>
+            </sc-for>
+          </div>
+        </div>
+      </sc-if>
+    </div>
+
+    <!-- DIET CHIPS -->
+    <div style="padding:14px 0 0">
+      <div class="scx" style="display:flex;gap:8px;overflow-x:auto;padding:0 16px 2px;scroll-snap-type:x">
+        <sc-for list="{{ dietChips }}" as="c" hint-placeholder-count="6">
+          <button onClick="{{ c.onClick }}" aria-pressed="{{ c.active }}" style="{{ c.style }}">{{ c.icon }}{{ c.label }}</button>
+        </sc-for>
+      </div>
+    </div>
+
+    <!-- CATEGORY TABS -->
+    <div style="position:sticky;top:0;z-index:5;background:var(--bg,#f7f3ec);padding:14px 0 8px;margin-top:6px">
+      <div class="scx" style="display:flex;gap:8px;overflow-x:auto;padding:0 16px">
+        <sc-for list="{{ categories }}" as="t" hint-placeholder-count="4">
+          <button onClick="{{ t.onClick }}" aria-current="{{ t.active }}" style="{{ t.style }}">{{ t.label }}<span style="opacity:.6;font-weight:600">{{ t.count }}</span></button>
+        </sc-for>
+      </div>
+    </div>
+
+    <!-- DISH LIST / STORY GRID -->
+    <div style="padding:8px 16px 0">
+      <div ref="{{ gridRef }}" style="{{ listWrapStyle }}">
+        <sc-for list="{{ visibleDishes }}" as="d" hint-placeholder-count="6">
+
+          <sc-if value="{{ d.isStory }}">
+            <div style="{{ d.storyStyle }}">
+              {{ d.mediaEl }}
+              <div style="position:absolute;inset:0;z-index:2;pointer-events:none;background:linear-gradient(180deg,rgba(0,0,0,.32) 0%,rgba(0,0,0,0) 24%,rgba(0,0,0,0) 44%,rgba(0,0,0,.76) 100%)"></div>
+              <div style="position:absolute;top:8px;left:8px;right:8px;display:flex;gap:4px;z-index:5;pointer-events:none">
+                <sc-for list="{{ d.segments }}" as="s"><div style="{{ s.style }}"></div></sc-for>
+              </div>
+              <sc-if value="{{ d.isVideo }}">
+                <div style="position:absolute;top:18px;right:10px;z-index:5;pointer-events:none;display:flex;align-items:center;gap:4px;background:rgba(0,0,0,.42);color:#fff;font-size:9px;font-weight:800;letter-spacing:.06em;padding:3px 7px;border-radius:20px">{{ icVideo }}VIDEO</div>
+              </sc-if>
+              <button onClick="{{ d.onPrev }}" aria-label="{{ txt.prevMedia }}" style="position:absolute;left:0;top:0;width:38%;height:100%;z-index:3;background:transparent;border:none;cursor:pointer;-webkit-tap-highlight-color:transparent"></button>
+              <button onClick="{{ d.onNext }}" aria-label="{{ txt.nextMedia }}" style="position:absolute;right:0;top:0;width:62%;height:100%;z-index:3;background:transparent;border:none;cursor:pointer;-webkit-tap-highlight-color:transparent"></button>
+              <div onClick="{{ d.onCard }}" role="button" tabindex="0" aria-label="{{ d.name }}" style="position:absolute;left:0;right:0;bottom:0;z-index:6;padding:12px;cursor:pointer;color:#fff">
+                <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:7px">
+                  <sc-for list="{{ d.dietPillsLite }}" as="p">
+                    <span style="display:inline-flex;align-items:center;gap:3px;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.28);font-size:10px;font-weight:600;padding:2px 7px;border-radius:20px;color:#fff">{{ p.icon }}{{ p.label }}</span>
+                  </sc-for>
+                </div>
+                <div style="font-family:'DM Serif Display',Georgia,serif;font-size:17px;line-height:1.08;letter-spacing:-.01em;text-shadow:0 1px 6px rgba(0,0,0,.45)">{{ d.name }}</div>
+                <div style="font-size:12px;line-height:1.32;margin-top:3px;opacity:.92;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;text-shadow:0 1px 4px rgba(0,0,0,.45)">{{ d.desc }}</div>
+                <div style="display:flex;align-items:center;gap:8px;margin-top:10px">
+                  <span style="font-weight:800;font-size:16px;text-shadow:0 1px 4px rgba(0,0,0,.45)">{{ d.priceStr }}</span>
+                  <span style="font-size:11px;opacity:.82;font-weight:600">{{ d.kcalStr }}</span>
+                  <button onClick="{{ d.onAdd }}" aria-label="{{ txt.addAria }}" style="margin-left:auto;width:36px;height:36px;border-radius:12px;border:none;background:var(--accent2,#d4694a);color:#fff;display:grid;place-items:center;cursor:pointer;box-shadow:0 3px 10px rgba(0,0,0,.3)">{{ d.addIcon }}</button>
+                </div>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ d.isPlain }}">
+            <div onClick="{{ d.onCard }}" role="button" tabindex="0" style="{{ d.cardStyle }}">
+              <sc-if value="{{ d.showImg }}">
+                <div role="img" aria-label="{{ d.name }}" style="{{ d.imgStyle }}"></div>
+              </sc-if>
+              <div style="{{ d.bodyStyle }}">
+                <div style="display:flex;align-items:flex-start;gap:8px">
+                  <div style="flex:1;min-width:0">
+                    <div style="font-weight:700;font-size:15px;letter-spacing:-.01em">{{ d.name }}</div>
+                    <sc-if value="{{ d.showDesc }}"><div style="color:var(--muted,#8a8275);font-size:13px;margin-top:3px;text-wrap:pretty">{{ d.desc }}</div></sc-if>
+                  </div>
+                  <div style="font-weight:800;font-size:15px;white-space:nowrap">{{ d.priceStr }}</div>
+                </div>
+                <div style="display:flex;align-items:center;gap:8px;margin-top:10px">
+                  <sc-if value="{{ d.showPills }}">
+                    <div style="display:flex;gap:5px;flex-wrap:wrap;flex:1;align-items:center">
+                      <span style="display:inline-flex;align-items:center;gap:4px;font-size:11px;color:var(--muted,#8a8275);font-weight:600">{{ d.flameOrDot }}{{ d.kcalStr }}</span>
+                      <sc-for list="{{ d.dietPills }}" as="p">
+                        <span style="display:inline-flex;align-items:center;gap:4px;background:var(--surface2,#f1ece2);color:var(--text);font-size:11px;font-weight:600;padding:3px 8px;border-radius:20px">{{ p.icon }}{{ p.label }}</span>
+                      </sc-for>
+                    </div>
+                  </sc-if>
+                  <sc-if value="{{ d.compactMeta }}">
+                    <span style="font-size:11px;color:var(--muted);font-weight:600;flex:1">{{ d.kcalStr }}</span>
+                  </sc-if>
+                  <button onClick="{{ d.onAdd }}" aria-label="{{ txt.addAria }}" style="width:38px;height:38px;border-radius:12px;border:none;background:var(--accent,#127a86);color:var(--accentText,#fff);display:grid;place-items:center;cursor:pointer;flex-shrink:0;box-shadow:0 2px 6px rgba(0,0,0,.1)">{{ d.addIcon }}</button>
+                </div>
+              </div>
+            </div>
+          </sc-if>
+
+        </sc-for>
+      </div>
+      <sc-if value="{{ noResults }}">
+        <div style="text-align:center;padding:40px 20px;color:var(--muted,#8a8275)">
+          <div style="display:inline-flex;width:56px;height:56px;border-radius:50%;background:var(--surface2,#f1ece2);align-items:center;justify-content:center;margin-bottom:12px">{{ icSearchBig }}</div>
+          <div style="font-weight:700;color:var(--text);font-size:16px">{{ txt.noResults }}</div>
+          <div style="font-size:14px;margin-top:4px">{{ txt.noResultsHint }}</div>
+        </div>
+      </sc-if>
+    </div>
+
+    <!-- FOOTER -->
+    <div style="margin-top:26px;padding:22px 16px 130px;background:var(--surface,#fff);border-top:1px solid var(--border,#e8e0d4)">
+      <h2 style="margin:0 0 14px;font-family:'DM Serif Display',Georgia,serif;font-size:21px">{{ brand }}</h2>
+      <div style="display:flex;gap:9px;align-items:flex-start;margin-bottom:12px">
+        <span style="color:var(--accent,#127a86);display:inline-flex;margin-top:1px">{{ icClock }}</span>
+        <div><div style="font-size:12px;color:var(--muted);font-weight:600">{{ txt.hoursLabel }}</div><div style="font-size:14px">{{ txt.hours }}</div></div>
+      </div>
+      <div style="display:flex;gap:9px;align-items:flex-start;margin-bottom:14px">
+        <span style="color:var(--accent,#127a86);display:inline-flex;margin-top:1px">{{ icMap }}</span>
+        <div style="flex:1"><div style="font-size:12px;color:var(--muted);font-weight:600">{{ txt.addressLabel }}</div><div style="font-size:14px">{{ txt.address }}</div></div>
+      </div>
+      <div style="height:120px;border-radius:14px;background:repeating-linear-gradient(135deg,var(--surface2,#f1ece2),var(--surface2,#f1ece2) 10px,rgba(0,0,0,.03) 10px,rgba(0,0,0,.03) 20px);border:1px solid var(--border,#e8e0d4);display:grid;place-items:center;color:var(--muted);font-size:12px;font-family:ui-monospace,monospace;letter-spacing:.08em;margin-bottom:16px">MAPA</div>
+      <a href="{{ googleHref }}" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:12px;padding:13px 14px;border-radius:14px;border:1px solid var(--border,#e8e0d4);background:var(--surface,#fff);text-decoration:none;color:var(--text);margin-bottom:18px">
+        <span style="display:grid;place-items:center;width:36px;height:36px;border-radius:50%;background:var(--surface2,#f1ece2);color:var(--star,#e0a93b);flex-shrink:0">{{ icStar }}</span>
+        <div style="flex:1;min-width:0"><div style="font-weight:700;font-size:14px">{{ txt.googleReviews }}</div><div style="font-size:12px;color:var(--muted,#8a8275);display:flex;align-items:center;gap:5px"><strong style="color:var(--text)">4.8</strong>· {{ txt.reviews }}</div></div>
+        <span style="color:var(--muted);display:inline-flex">{{ icChevronR }}</span>
+      </a>
+      <div style="margin-bottom:18px">
+        <div style="font-size:12px;color:var(--muted,#8a8275);font-weight:600;margin-bottom:10px">{{ txt.followUs }}</div>
+        <div style="display:flex;gap:10px">
+          <a href="#" onClick="{{ noop }}" aria-label="Instagram" style="display:inline-flex;width:40px;height:40px;border-radius:50%;background:var(--surface2,#f1ece2);align-items:center;justify-content:center;color:var(--text);text-decoration:none">{{ icInsta }}</a>
+          <a href="#" onClick="{{ noop }}" aria-label="Facebook" style="display:inline-flex;width:40px;height:40px;border-radius:50%;background:var(--surface2,#f1ece2);align-items:center;justify-content:center;color:var(--text);text-decoration:none">{{ icFacebook }}</a>
+          <a href="#" onClick="{{ noop }}" aria-label="X" style="display:inline-flex;width:40px;height:40px;border-radius:50%;background:var(--surface2,#f1ece2);align-items:center;justify-content:center;color:var(--text);text-decoration:none">{{ icTwitter }}</a>
+          <a href="#" onClick="{{ noop }}" aria-label="YouTube" style="display:inline-flex;width:40px;height:40px;border-radius:50%;background:var(--surface2,#f1ece2);align-items:center;justify-content:center;color:var(--text);text-decoration:none">{{ icYoutube }}</a>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:7px;padding-top:14px;border-top:1px solid var(--border,#e8e0d4);color:var(--muted,#8a8275);font-size:13px">{{ icSpark2 }}<span>{{ txt.made }}</span></div>
+    </div>
+  </div>
+
+  <!-- FLOATING FABs : bottom-left (waiter / bill) -->
+  <div style="position:absolute;left:14px;bottom:18px;display:flex;flex-direction:column;gap:10px;align-items:flex-start;z-index:30">
+    <button onClick="{{ callWaiter }}" style="display:flex;align-items:center;gap:8px;height:46px;padding:0 16px;border-radius:30px;background:var(--surface,#fff);color:var(--text);border:1px solid var(--border,#e8e0d4);box-shadow:0 4px 12px rgba(0,0,0,.14);cursor:pointer;font-family:inherit;font-weight:600;font-size:13px;white-space:nowrap">{{ icBell }}<span>{{ txt.waiter }}</span></button>
+    <button onClick="{{ requestBill }}" style="display:flex;align-items:center;gap:8px;height:46px;padding:0 16px;border-radius:30px;background:var(--surface,#fff);color:var(--text);border:1px solid var(--border,#e8e0d4);box-shadow:0 4px 12px rgba(0,0,0,.14);cursor:pointer;font-family:inherit;font-weight:600;font-size:13px;white-space:nowrap">{{ icReceipt }}<span>{{ txt.bill }}</span></button>
+  </div>
+
+  <!-- FLOATING FABs : bottom-right (smartwaiter / cart) -->
+  <div style="position:absolute;right:14px;bottom:18px;display:flex;flex-direction:column;gap:11px;align-items:flex-end;z-index:30">
+    <button onClick="{{ openChat }}" style="display:flex;align-items:center;gap:8px;background:var(--accent2,#d4694a);color:#fff;border:none;border-radius:30px;padding:12px 17px;font-weight:700;font-size:14px;box-shadow:0 6px 20px rgba(0,0,0,.22);cursor:pointer;font-family:inherit">{{ icSpark }}SmartWaiter</button>
+    <button onClick="{{ openCart }}" aria-label="{{ txt.cart }}" style="position:relative;width:56px;height:56px;border-radius:50%;background:var(--accent,#127a86);color:var(--accentText,#fff);border:none;box-shadow:0 6px 20px rgba(0,0,0,.22);display:grid;place-items:center;cursor:pointer">{{ icCart }}<sc-if value="{{ hasCart }}"><span style="position:absolute;top:-3px;right:-3px;background:var(--accent2,#d4694a);color:#fff;min-width:22px;height:22px;border-radius:11px;font-size:12px;font-weight:800;display:grid;place-items:center;padding:0 6px;border:2px solid var(--bg,#f7f3ec)">{{ cartCount }}</span></sc-if></button>
+  </div>
+
+  <sc-if value="{{ currencyOpen }}"><div onClick="{{ closeCurrency }}" style="position:absolute;inset:0;z-index:9"></div></sc-if>
+
+  <!-- TOAST -->
+  <sc-if value="{{ toastMsg }}">
+    <div role="status" aria-live="polite" style="position:absolute;top:16px;left:50%;z-index:60;background:var(--text,#2a2722);color:var(--bg,#f7f3ec);padding:11px 18px;border-radius:30px;font-size:13px;font-weight:600;box-shadow:0 8px 24px rgba(0,0,0,.25);animation:scToast .25s ease;white-space:nowrap;max-width:92%;display:flex;align-items:center;gap:8px">{{ icCheck }}{{ toastMsg }}</div>
+  </sc-if>
+
+  <!-- CART DRAWER -->
+  <sc-if value="{{ cartOpen }}">
+    <div onClick="{{ closeCart }}" style="position:absolute;inset:0;z-index:40;background:rgba(0,0,0,.45);animation:scIn .2s ease;display:flex;flex-direction:column;justify-content:flex-end">
+      <div onClick="{{ stop }}" role="dialog" aria-modal="true" aria-label="{{ txt.cart }}" style="background:var(--surface,#fff);border-radius:22px 22px 0 0;max-height:86%;display:flex;flex-direction:column;animation:scSheet .28s cubic-bezier(.2,.8,.2,1)">
+        <div style="padding:16px 18px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border,#e8e0d4)">
+          <span style="color:var(--accent,#127a86);display:inline-flex">{{ icCart }}</span>
+          <strong style="font-size:17px;flex:1">{{ txt.cart }}</strong>
+          <button onClick="{{ closeCart }}" aria-label="{{ txt.closeAria }}" style="width:34px;height:34px;border-radius:50%;border:none;background:var(--surface2,#f1ece2);color:var(--text);display:grid;place-items:center;cursor:pointer">{{ icX }}</button>
+        </div>
+
+        <sc-if value="{{ orderConfirmed }}">
+          <div style="padding:42px 24px;text-align:center;animation:scUp .3s ease">
+            <div style="color:var(--accent,#127a86);display:flex;justify-content:center;margin-bottom:14px">{{ icCheckBig }}</div>
+            <div style="font-family:'DM Serif Display',Georgia,serif;font-size:24px;margin-bottom:8px">{{ txt.orderTitle }}</div>
+            <div style="color:var(--muted,#8a8275);font-size:14px;margin-bottom:24px">{{ txt.orderMsg }}</div>
+            <button onClick="{{ newOrder }}" style="width:100%;padding:15px;border-radius:14px;border:none;background:var(--accent,#127a86);color:var(--accentText,#fff);font-weight:700;font-size:15px;cursor:pointer;font-family:inherit">{{ txt.newOrder }}</button>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ cartShowEmpty }}">
+          <div style="padding:50px 24px;text-align:center;color:var(--muted,#8a8275)">
+            <div style="display:inline-flex;width:60px;height:60px;border-radius:50%;background:var(--surface2,#f1ece2);align-items:center;justify-content:center;margin-bottom:14px">{{ icCartBig }}</div>
+            <div style="font-weight:700;color:var(--text);font-size:16px">{{ txt.cartEmpty }}</div>
+            <div style="font-size:14px;margin-top:5px">{{ txt.cartEmptyHint }}</div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ cartShowFlow }}">
+          <div style="display:flex;align-items:center;padding:14px 18px 8px">
+            <sc-for list="{{ cartSteps }}" as="st">
+              <button onClick="{{ st.onClick }}" style="display:flex;align-items:center;gap:7px;background:none;border:none;cursor:pointer;font-family:inherit;padding:0;flex-shrink:0"><span style="{{ st.circleStyle }}">{{ st.mark }}</span><span style="{{ st.labelStyle }}">{{ st.label }}</span></button>
+              <sc-if value="{{ st.hasLine }}"><div style="{{ st.lineStyle }}"></div></sc-if>
+            </sc-for>
+          </div>
+
+          <sc-if value="{{ isStep1 }}">
+            <div class="scx" style="overflow-y:auto;padding:6px 18px;flex:1">
+              <sc-for list="{{ cartItems }}" as="i" hint-placeholder-count="2">
+                <div style="display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--border,#e8e0d4)">
+                  <div role="img" aria-label="{{ i.name }}" style="{{ i.imgStyle }}"></div>
+                  <div style="flex:1;min-width:0"><div style="font-weight:700;font-size:14px">{{ i.name }}</div><div style="color:var(--muted,#8a8275);font-size:13px">{{ i.priceStr }}</div></div>
+                  <div style="display:flex;align-items:center;gap:8px">
+                    <button onClick="{{ i.onDec }}" aria-label="-" style="width:30px;height:30px;border-radius:9px;border:1px solid var(--border,#e8e0d4);background:var(--surface,#fff);color:var(--text);display:grid;place-items:center;cursor:pointer">{{ i.minus }}</button>
+                    <span style="min-width:18px;text-align:center;font-weight:700;font-size:14px">{{ i.qty }}</span>
+                    <button onClick="{{ i.onInc }}" aria-label="+" style="width:30px;height:30px;border-radius:9px;border:1px solid var(--border,#e8e0d4);background:var(--surface,#fff);color:var(--text);display:grid;place-items:center;cursor:pointer">{{ i.plus }}</button>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+            <div style="padding:14px 18px 18px;border-top:1px solid var(--border,#e8e0d4)">
+              <div style="display:flex;justify-content:space-between;margin-bottom:12px;font-size:16px"><span style="color:var(--muted,#8a8275);font-weight:600">{{ txt.total }}</span><strong style="font-size:19px">{{ cartTotalStr }}</strong></div>
+              <button onClick="{{ goStep2 }}" style="width:100%;padding:15px;border-radius:14px;border:none;background:var(--accent,#127a86);color:var(--accentText,#fff);font-weight:700;font-size:15px;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:6px">{{ txt.continueBtn }}{{ icChevronR }}</button>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ isStep2 }}">
+            <div class="scx" style="overflow-y:auto;padding:14px 18px;flex:1">
+              <div style="font-family:'DM Serif Display',Georgia,serif;font-size:21px;line-height:1.1">{{ txt.suggTitle }}</div>
+              <div style="color:var(--muted,#8a8275);font-size:13px;margin:5px 0 16px;text-wrap:pretty">{{ txt.suggSub }}</div>
+              <div style="display:flex;flex-direction:column;gap:11px">
+                <sc-for list="{{ suggestions }}" as="g" hint-placeholder-count="3">
+                  <div style="display:flex;gap:12px;align-items:center;border:1px solid var(--border,#e8e0d4);border-radius:14px;padding:10px;background:var(--surface,#fff)">
+                    <div role="img" aria-label="{{ g.name }}" style="{{ g.imgStyle }}"></div>
+                    <div style="flex:1;min-width:0">
+                      <div style="font-size:10px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--accent,#127a86);margin-bottom:3px">{{ g.tag }}</div>
+                      <div style="font-weight:700;font-size:14px">{{ g.name }}</div>
+                      <div style="color:var(--muted,#8a8275);font-size:12px;line-height:1.3;margin-top:2px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">{{ g.desc }}</div>
+                      <div style="font-weight:800;font-size:14px;margin-top:5px">{{ g.priceStr }}</div>
+                    </div>
+                    <button onClick="{{ g.onAdd }}" aria-label="{{ txt.addBtn }}" style="width:38px;height:38px;border-radius:12px;border:none;background:var(--accent,#127a86);color:var(--accentText,#fff);display:grid;place-items:center;cursor:pointer;flex-shrink:0;box-shadow:0 2px 6px rgba(0,0,0,.12)">{{ g.addIcon }}</button>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+            <div style="padding:14px 18px 18px;border-top:1px solid var(--border,#e8e0d4);display:flex;gap:10px">
+              <button onClick="{{ goStep1 }}" style="flex:1;padding:14px;border-radius:14px;border:1px solid var(--border,#e8e0d4);background:var(--surface,#fff);color:var(--text);font-weight:700;font-size:14px;cursor:pointer;font-family:inherit">{{ txt.backToCart }}</button>
+              <button onClick="{{ goStep3 }}" style="flex:1.4;padding:14px;border-radius:14px;border:none;background:var(--accent,#127a86);color:var(--accentText,#fff);font-weight:700;font-size:14px;cursor:pointer;font-family:inherit">{{ txt.continueShop }}</button>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ isStep3 }}">
+            <div class="scx" style="overflow-y:auto;padding:16px 18px;flex:1;display:flex;flex-direction:column;gap:20px">
+              <div>
+                <div style="{{ sectionTitleStyle }}">{{ txt.deliveryType }}</div>
+                <div style="display:flex;flex-direction:column;gap:9px">
+                  <sc-for list="{{ deliveryOpts }}" as="o">
+                    <button onClick="{{ o.onClick }}" aria-pressed="{{ o.selected }}" style="{{ o.style }}">
+                      <span style="{{ o.radioStyle }}">{{ o.dot }}</span>
+                      <span style="flex:1;min-width:0"><span style="display:block;font-weight:700;font-size:14px">{{ o.title }}</span><span style="display:block;color:var(--muted,#8a8275);font-size:12px;margin-top:2px">{{ o.sub }}</span></span>
+                    </button>
+                  </sc-for>
+                </div>
+              </div>
+              <sc-if value="{{ showTable }}">
+                <div>
+                  <label style="{{ labelStyle }}">{{ txt.tableNo }} *</label>
+                  <input value="{{ tableNo }}" onChange="{{ onTableNo }}" placeholder="{{ txt.tableNoPh }}" style="{{ fieldStyle }}" />
+                </div>
+              </sc-if>
+              <div>
+                <label style="{{ labelStyle }}">{{ txt.special }}</label>
+                <textarea value="{{ special }}" onChange="{{ onSpecial }}" placeholder="{{ txt.specialPh }}" rows="2" style="{{ fieldStyle }}"></textarea>
+              </div>
+              <div>
+                <div style="{{ sectionTitleStyle }}">{{ txt.custInfo }}</div>
+                <div style="display:flex;flex-direction:column;gap:12px">
+                  <div><label style="{{ labelStyle }}">{{ txt.fullName }} *</label><input value="{{ custName }}" onChange="{{ onCustName }}" placeholder="{{ txt.fullNamePh }}" style="{{ fieldStyle }}" /></div>
+                  <div><label style="{{ labelStyle }}">{{ txt.email }} *</label><input value="{{ custEmail }}" onChange="{{ onCustEmail }}" placeholder="{{ txt.emailPh }}" type="email" style="{{ fieldStyle }}" /></div>
+                  <div><label style="{{ labelStyle }}">{{ txt.phone }}</label><input value="{{ custPhone }}" onChange="{{ onCustPhone }}" placeholder="{{ txt.phonePh }}" type="tel" style="{{ fieldStyle }}" /></div>
+                </div>
+              </div>
+              <div>
+                <div style="{{ sectionTitleStyle }}">{{ txt.orderSummary }}</div>
+                <div style="background:var(--surface2,#f1ece2);border-radius:13px;padding:13px">
+                  <sc-for list="{{ cartItems }}" as="i">
+                    <div style="display:flex;justify-content:space-between;gap:10px;font-size:13px;padding:4px 0"><span style="color:var(--text)">{{ i.name }} <span style="color:var(--muted,#8a8275)">x{{ i.qty }}</span></span><span style="font-weight:700;white-space:nowrap">{{ i.lineStr }}</span></div>
+                  </sc-for>
+                  <div style="display:flex;justify-content:space-between;margin-top:8px;padding-top:10px;border-top:1px solid var(--border,#e8e0d4);font-size:15px"><strong>{{ txt.total }}</strong><strong>{{ cartTotalStr }}</strong></div>
+                </div>
+              </div>
+            </div>
+            <div style="padding:14px 18px 18px;border-top:1px solid var(--border,#e8e0d4);display:flex;gap:10px">
+              <button onClick="{{ goStep1 }}" style="flex:1;padding:14px;border-radius:14px;border:1px solid var(--border,#e8e0d4);background:var(--surface,#fff);color:var(--text);font-weight:700;font-size:14px;cursor:pointer;font-family:inherit">{{ txt.backToCart }}</button>
+              <button onClick="{{ createOrder }}" style="flex:1.4;padding:14px;border-radius:14px;border:none;background:var(--accent,#127a86);color:var(--accentText,#fff);font-weight:700;font-size:14px;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:7px">{{ icCheck }}{{ txt.createOrder }}</button>
+            </div>
+          </sc-if>
+        </sc-if>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- DISH MODAL -->
+  <sc-if value="{{ modal }}">
+    <div onClick="{{ closeModal }}" style="position:absolute;inset:0;z-index:50;background:rgba(0,0,0,.5);animation:scIn .2s ease;display:flex;align-items:center;justify-content:center;padding:18px">
+      <div onClick="{{ stop }}" role="dialog" aria-modal="true" aria-label="{{ modal.name }}" style="background:var(--surface,#fff);border-radius:22px;overflow:hidden;width:100%;max-width:460px;max-height:90%;display:flex;flex-direction:column;animation:scPop .26s cubic-bezier(.2,.8,.2,1)">
+        <div style="{{ modal.imgStyle }}">
+          <button onClick="{{ closeModal }}" aria-label="{{ txt.closeAria }}" style="position:absolute;top:12px;right:12px;width:38px;height:38px;border-radius:50%;border:none;background:rgba(255,255,255,.92);color:#2a2722;display:grid;place-items:center;cursor:pointer">{{ icX }}</button>
+        </div>
+        <div class="scx" style="overflow-y:auto;padding:18px">
+          <div style="display:flex;align-items:flex-start;gap:10px">
+            <h2 style="margin:0;flex:1;font-family:'DM Serif Display',Georgia,serif;font-size:24px;line-height:1.1">{{ modal.name }}</h2>
+            <div style="font-weight:800;font-size:20px">{{ modal.priceStr }}</div>
+          </div>
+          <p style="color:var(--muted,#8a8275);font-size:14px;margin:8px 0 14px;text-wrap:pretty">{{ modal.desc }}</p>
+          <sc-if value="{{ modal.hasDiets }}">
+            <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px">
+              <sc-for list="{{ modal.dietPills }}" as="p"><span style="display:inline-flex;align-items:center;gap:5px;background:var(--surface2,#f1ece2);font-size:12px;font-weight:600;padding:5px 11px;border-radius:20px">{{ p.icon }}{{ p.label }}</span></sc-for>
+            </div>
+          </sc-if>
+          <sc-if value="{{ modal.showNutrition }}">
+            <div style="background:var(--surface2,#f1ece2);border-radius:14px;padding:14px;margin-bottom:14px">
+              <div style="font-size:12px;font-weight:700;color:var(--muted,#8a8275);text-transform:uppercase;letter-spacing:.05em;margin-bottom:12px">{{ txt.nutrition }}</div>
+              <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:14px"><span style="font-size:13px;color:var(--muted)">{{ txt.energy }}</span><strong style="font-size:22px">{{ modal.kcalStr }}</strong></div>
+              <div style="display:flex;gap:8px">
+                <sc-for list="{{ modal.macros }}" as="m"><div style="flex:1;text-align:center;background:var(--surface,#fff);border-radius:11px;padding:10px 6px"><div style="font-weight:800;font-size:16px">{{ m.val }}</div><div style="font-size:11px;color:var(--muted,#8a8275);margin-top:2px">{{ m.label }}</div></div></sc-for>
+              </div>
+            </div>
+          </sc-if>
+          <div style="margin-bottom:18px">
+            <div style="font-size:12px;font-weight:700;color:var(--muted,#8a8275);text-transform:uppercase;letter-spacing:.05em;margin-bottom:9px">{{ txt.allergensLabel }}</div>
+            <sc-if value="{{ modal.hasAllergens }}">
+              <div style="display:flex;gap:6px;flex-wrap:wrap"><sc-for list="{{ modal.allergens }}" as="a"><span style="background:rgba(212,105,74,.12);color:var(--accent2,#d4694a);font-size:12px;font-weight:600;padding:5px 11px;border-radius:20px">{{ a.label }}</span></sc-for></div>
+            </sc-if>
+            <sc-if value="{{ modal.noAllergens }}"><span style="color:var(--muted,#8a8275);font-size:14px">{{ txt.noAllergens }}</span></sc-if>
+          </div>
+        </div>
+        <div style="padding:14px 18px;border-top:1px solid var(--border,#e8e0d4)">
+          <button onClick="{{ modal.onAdd }}" style="width:100%;padding:15px;border-radius:14px;border:none;background:var(--accent,#127a86);color:var(--accentText,#fff);font-weight:700;font-size:15px;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:8px">{{ icPlusW }}{{ txt.addToCart }} · {{ modal.priceStr }}</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- SMARTWAITER CHAT -->
+  <sc-if value="{{ chatOpen }}">
+    <div onClick="{{ closeChat }}" style="position:absolute;inset:0;z-index:55;background:rgba(0,0,0,.45);animation:scIn .2s ease;display:flex;flex-direction:column;justify-content:flex-end">
+      <div onClick="{{ stop }}" role="dialog" aria-modal="true" aria-label="SmartWaiter" style="background:var(--surface,#fff);border-radius:22px 22px 0 0;height:82%;display:flex;flex-direction:column;animation:scSheet .3s cubic-bezier(.2,.8,.2,1)">
+        <div style="padding:15px 18px;display:flex;align-items:center;gap:11px;border-bottom:1px solid var(--border,#e8e0d4)">
+          <div style="width:38px;height:38px;border-radius:50%;background:var(--accent2,#d4694a);color:#fff;display:grid;place-items:center">{{ icSpark }}</div>
+          <div style="flex:1"><div style="font-weight:800;font-size:15px">SmartWaiter</div><div style="font-size:12px;color:var(--accent,#127a86);font-weight:600;display:flex;align-items:center;gap:5px"><span style="width:7px;height:7px;border-radius:50%;background:var(--accent,#127a86);display:inline-block"></span>{{ txt.online }}</div></div>
+          <button onClick="{{ closeChat }}" aria-label="{{ txt.closeAria }}" style="width:34px;height:34px;border-radius:50%;border:none;background:var(--surface2,#f1ece2);color:var(--text);display:grid;place-items:center;cursor:pointer">{{ icX }}</button>
+        </div>
+        <div ref="{{ chatScrollRef }}" class="scx" style="flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px;background:var(--bg,#f7f3ec)">
+          <sc-for list="{{ chatMsgs }}" as="m" hint-placeholder-count="1">
+            <div style="{{ m.rowStyle }}">
+              <div style="display:flex;flex-direction:column;gap:8px;max-width:84%">
+                <div style="{{ m.bubbleStyle }}">{{ m.text }}</div>
+                <sc-if value="{{ m.hasDishes }}">
+                  <div style="display:flex;flex-direction:column;gap:7px">
+                    <sc-for list="{{ m.dishes }}" as="d">
+                      <button onClick="{{ d.onClick }}" style="display:flex;align-items:center;gap:10px;background:var(--surface,#fff);border:1px solid var(--border,#e8e0d4);border-radius:13px;padding:7px;cursor:pointer;text-align:left;font-family:inherit;box-shadow:0 1px 3px rgba(0,0,0,.04)">
+                        <div role="img" aria-label="{{ d.name }}" style="{{ d.imgStyle }}"></div>
+                        <div style="flex:1;min-width:0"><div style="font-weight:700;font-size:13px;color:var(--text)">{{ d.name }}</div><div style="color:var(--muted,#8a8275);font-size:12px;font-weight:600">{{ d.priceStr }}</div></div>
+                        <span style="color:var(--muted);display:inline-flex">{{ d.chev }}</span>
+                      </button>
+                    </sc-for>
+                  </div>
+                </sc-if>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+        <div style="padding:10px 14px 6px;display:flex;gap:7px;overflow-x:auto;background:var(--surface,#fff)" class="scx">
+          <sc-for list="{{ chatChips }}" as="c">
+            <button onClick="{{ c.onClick }}" style="white-space:nowrap;flex-shrink:0;background:var(--surface2,#f1ece2);color:var(--text);border:1px solid var(--border,#e8e0d4);border-radius:20px;padding:8px 13px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">{{ c.label }}</button>
+          </sc-for>
+        </div>
+        <form onSubmit="{{ submitChat }}" style="padding:8px 14px 16px;display:flex;gap:9px;align-items:center;background:var(--surface,#fff)">
+          <input value="{{ chatInput }}" onChange="{{ onChatInput }}" placeholder="{{ txt.sendPh }}" aria-label="{{ txt.sendPh }}" style="flex:1;padding:13px 16px;border-radius:24px;border:1px solid var(--border,#e8e0d4);background:var(--bg,#f7f3ec);color:var(--text);font-size:15px;font-family:inherit" />
+          <button type="submit" aria-label="{{ txt.send }}" style="width:46px;height:46px;border-radius:50%;border:none;background:var(--accent,#127a86);color:var(--accentText,#fff);display:grid;place-items:center;cursor:pointer;flex-shrink:0">{{ icSend }}</button>
+        </form>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- SETTINGS SHEET -->
+  <sc-if value="{{ settingsOpen }}">
+    <div onClick="{{ closeSettings }}" style="position:absolute;inset:0;z-index:58;background:rgba(0,0,0,.45);animation:scIn .2s ease;display:flex;flex-direction:column;justify-content:flex-end">
+      <div onClick="{{ stop }}" role="dialog" aria-modal="true" aria-label="{{ txt.settings }}" style="background:var(--surface,#fff);border-radius:22px 22px 0 0;max-height:86%;overflow-y:auto;animation:scSheet .28s cubic-bezier(.2,.8,.2,1)" class="scx">
+        <div style="padding:16px 18px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border,#e8e0d4);position:sticky;top:0;background:var(--surface,#fff)">
+          <span style="color:var(--accent,#127a86);display:inline-flex">{{ icSettings }}</span>
+          <strong style="font-size:17px;flex:1">{{ txt.settings }}</strong>
+          <button onClick="{{ closeSettings }}" aria-label="{{ txt.closeAria }}" style="width:34px;height:34px;border-radius:50%;border:none;background:var(--surface2,#f1ece2);color:var(--text);display:grid;place-items:center;cursor:pointer">{{ icX }}</button>
+        </div>
+        <div style="padding:18px">
+          <sc-for list="{{ settingsGroups }}" as="g">
+            <div style="margin-bottom:20px">
+              <div style="font-size:13px;font-weight:700;color:var(--muted,#8a8275);margin-bottom:9px">{{ g.title }}</div>
+              <div style="display:flex;gap:8px;background:var(--surface2,#f1ece2);padding:5px;border-radius:13px">
+                <sc-for list="{{ g.opts }}" as="o"><button onClick="{{ o.onClick }}" aria-pressed="{{ o.active }}" style="{{ o.style }}">{{ o.label }}</button></sc-for>
+              </div>
+            </div>
+          </sc-for>
+          <div style="display:flex;align-items:center;gap:12px;padding:4px 0 8px">
+            <div style="flex:1"><div style="font-size:14px;font-weight:700">{{ txt.showNutrition }}</div></div>
+            <button onClick="{{ toggleNutrition }}" role="switch" aria-checked="{{ showNutrition }}" style="{{ nutSwitchStyle }}"><span style="{{ nutKnobStyle }}"></span></button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:430,&quot;height&quot;:900},&quot;brandName&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Café del Mar&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Marca&quot;},&quot;defaultLang&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;es&quot;,&quot;options&quot;:[&quot;es&quot;,&quot;en&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Marca&quot;},&quot;accentColor&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#2a6f6a&quot;,&quot;options&quot;:[&quot;#127a86&quot;,&quot;#2a6f6a&quot;,&quot;#c0563f&quot;,&quot;#3a5a8c&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Marca&quot;},&quot;accent2Color&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#5a8c6a&quot;,&quot;options&quot;:[&quot;#d4694a&quot;,&quot;#e0a93b&quot;,&quot;#a35a78&quot;,&quot;#5a8c6a&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Marca&quot;}}">
+class Component extends DCLogic {
+  constructor(props){
+    super(props);
+    const p = props || {};
+    this.rootRef = React.createRef();
+    this.chatScrollRef = React.createRef();
+    this.gridRef = React.createRef();
+    this.themes = {
+      light:{'--bg':'#ffffff','--surface':'#ffffff','--surface2':'#f4f1ec','--text':'#2a2722','--muted':'#8a8275','--border':'#e9e3da','--accent':'#127a86','--accent2':'#d4694a','--accentText':'#ffffff','--star':'#e0a93b'},
+      dark:{'--bg':'#16140f','--surface':'#211e19','--surface2':'#2b2720','--text':'#f0ebe0','--muted':'#a59c8c','--border':'#37322a','--accent':'#37b0bc','--accent2':'#e88a6a','--accentText':'#11100c','--star':'#e8b54a'}
+    };
+    this.CUR = {
+      EUR:{sym:'€',rate:1,name:{es:'Euro',en:'Euro'}},
+      USD:{sym:'$',rate:1.09,name:{es:'Dólar',en:'US Dollar'}},
+      GBP:{sym:'£',rate:0.86,name:{es:'Libra',en:'Pound'}}
+    };
+    this.CATS = [
+      {key:'entrantes',es:'Entrantes',en:'Starters'},
+      {key:'principales',es:'Principales',en:'Mains'},
+      {key:'postres',es:'Postres',en:'Desserts'},
+      {key:'bebidas',es:'Bebidas',en:'Drinks'},
+      {key:'cocteles',es:'Cócteles',en:'Cocktails'}
+    ];
+    this.DIET_ORDER = ['vegan','vegetarian','glutenfree','lactosefree','highprotein','lowcarb','spicy','keto','halal'];
+    this.DIETS = {
+      vegan:{es:'Vegano',en:'Vegan',ic:'Leaf'},
+      vegetarian:{es:'Vegetariano',en:'Vegetarian',ic:'Salad'},
+      glutenfree:{es:'Sin gluten',en:'Gluten-free',ic:'WheatOff'},
+      lactosefree:{es:'Sin lactosa',en:'Lactose-free',ic:'MilkOff'},
+      highprotein:{es:'Alto en proteína',en:'High protein',ic:'Dumbbell'},
+      lowcarb:{es:'Bajo en carb.',en:'Low carb',ic:'Apple'},
+      spicy:{es:'Picante',en:'Spicy',ic:'Flame'},
+      keto:{es:'Keto',en:'Keto',ic:'Beef'},
+      halal:{es:'Halal',en:'Halal',ic:'BadgeCheck'}
+    };
+    this.ALG_ORDER = ['gluten','crustaceans','eggs','fish','peanuts','soy','milk','nuts','celery','mustard','sesame','sulphites','lupin','molluscs'];
+    this.ALG = {
+      gluten:{es:'Gluten',en:'Gluten'},crustaceans:{es:'Crustáceos',en:'Crustaceans'},eggs:{es:'Huevos',en:'Eggs'},fish:{es:'Pescado',en:'Fish'},peanuts:{es:'Cacahuetes',en:'Peanuts'},soy:{es:'Soja',en:'Soy'},milk:{es:'Lácteos',en:'Milk'},nuts:{es:'Frutos secos',en:'Nuts'},celery:{es:'Apio',en:'Celery'},mustard:{es:'Mostaza',en:'Mustard'},sesame:{es:'Sésamo',en:'Sesame'},sulphites:{es:'Sulfitos',en:'Sulphites'},lupin:{es:'Altramuces',en:'Lupin'},molluscs:{es:'Moluscos',en:'Molluscs'}
+    };
+    this._dishes = [
+      {id:'e1',cat:'entrantes',n:{es:'Pan con tomate y AOVE',en:'Tomato bread & olive oil'},d:{es:'Masa madre tostada, tomate maduro rallado y aceite de oliva virgen extra.',en:'Toasted sourdough, grated ripe tomato and extra-virgin olive oil.'},p:6.5,img:'1414235077428-338989a2e8c0',k:240,pr:6,c:34,f:9,alg:['gluten'],diet:['vegan','vegetarian']},
+      {id:'e2',cat:'entrantes',n:{es:'Croquetas de jamón',en:'Iberian ham croquettes'},d:{es:'Cremosas croquetas caseras de jamón ibérico, seis unidades.',en:'Creamy homemade Iberian ham croquettes, six pieces.'},p:8.0,img:'1626844131082-256783844137',k:380,pr:14,c:28,f:22,alg:['gluten','milk','eggs'],diet:[]},
+      {id:'e3',cat:'entrantes',n:{es:'Hummus de remolacha',en:'Beetroot hummus'},d:{es:'Hummus de garbanzo y remolacha con tahini, semillas y crudités.',en:'Chickpea & beetroot hummus with tahini, seeds and crudités.'},p:7.5,img:'1593001874117-c99c800e3eb8',k:210,pr:7,c:22,f:11,alg:['sesame'],diet:['vegan','vegetarian','glutenfree','halal']},
+      {id:'e4',cat:'entrantes',n:{es:'Boquerones en vinagre',en:'Marinated anchovies'},d:{es:'Boquerones marinados en vinagre de Jerez con ajo y perejil.',en:'Anchovies marinated in sherry vinegar with garlic and parsley.'},p:9.0,img:'1559737558-2f5a35f4523b',k:180,pr:20,c:2,f:10,alg:['fish','sulphites'],diet:['glutenfree','lowcarb','highprotein']},
+      {id:'m1',cat:'principales',n:{es:'Paella de marisco',en:'Seafood paella'},d:{es:'Arroz bomba con gambas, mejillones, calamar y sofrito mediterráneo.',en:'Bomba rice with prawns, mussels, squid and Mediterranean sofrito.'},p:19.5,img:'1534080564583-6be75777b70a',k:620,pr:34,c:70,f:18,alg:['crustaceans','molluscs','fish'],diet:['glutenfree']},
+      {id:'m2',cat:'principales',n:{es:'Lubina a la sal',en:'Salt-baked sea bass'},d:{es:'Lubina fresca al horno en costra de sal con verduras de temporada.',en:'Fresh sea bass baked in a salt crust with seasonal vegetables.'},p:22.0,img:'1467003909585-2f8a72700288',k:410,pr:46,c:1,f:24,alg:['fish'],diet:['glutenfree','highprotein','lowcarb','keto','halal']},
+      {id:'m3',cat:'principales',n:{es:'Risotto de setas',en:'Wild mushroom risotto'},d:{es:'Arroz carnaroli cremoso con setas de bosque y parmesano curado.',en:'Creamy carnaroli rice with wild mushrooms and aged parmesan.'},p:16.5,img:'1476124369491-e7addf5db371',k:540,pr:12,c:66,f:22,alg:['milk'],diet:['vegetarian','glutenfree']},
+      {id:'m4',cat:'principales',n:{es:'Burger mediterránea',en:'Mediterranean burger'},d:{es:'Ternera, queso de cabra, pesto, rúcula y pan brioche artesano.',en:'Beef, goat cheese, pesto, rocket and artisan brioche bun.'},p:15.0,img:'1568901346375-23c9450c58cd',k:720,pr:38,c:52,f:38,alg:['gluten','eggs','milk'],diet:['highprotein']},
+      {id:'m5',cat:'principales',n:{es:'Curry de garbanzos picante',en:'Spicy chickpea curry'},d:{es:'Garbanzos en curry de coco picante con espinacas y arroz basmati.',en:'Chickpeas in spicy coconut curry with spinach and basmati rice.'},p:14.5,img:'1455619452474-d2be8b1e70cd',k:480,pr:21,c:58,f:17,alg:[],diet:['vegan','vegetarian','glutenfree','highprotein','spicy','halal']},
+      {id:'m6',cat:'principales',n:{es:'Pulpo a la brasa',en:'Grilled octopus'},d:{es:'Pulpo a la parrilla con parmentier de patata y pimentón ahumado.',en:'Grilled octopus with potato parmentier and smoked paprika.'},p:21.0,img:'1559339352-11d035aa65de',k:340,pr:38,c:8,f:16,alg:['molluscs'],diet:['glutenfree','highprotein','lowcarb','keto','halal']},
+      {id:'d1',cat:'postres',n:{es:'Crema catalana',en:'Catalan cream'},d:{es:'Crema tradicional con azúcar caramelizado y un toque de cítricos.',en:'Traditional custard with caramelised sugar and a citrus note.'},p:6.0,img:'1567620905732-2d1ec7ab7445',k:320,pr:6,c:40,f:15,alg:['eggs','milk'],diet:['vegetarian']},
+      {id:'d2',cat:'postres',n:{es:'Tarta de queso',en:'Basque cheesecake'},d:{es:'Tarta de queso al horno estilo vasco, cremosa por dentro.',en:'Baked Basque-style cheesecake, creamy in the centre.'},p:6.5,img:'1524351199678-941a58a3df50',k:450,pr:9,c:38,f:29,alg:['gluten','eggs','milk'],diet:['vegetarian']},
+      {id:'d3',cat:'postres',n:{es:'Sorbete de limón',en:'Lemon sorbet'},d:{es:'Sorbete artesano de limón con hierbabuena fresca. Sin lácteos.',en:'Artisan lemon sorbet with fresh mint. Dairy-free.'},p:5.5,img:'1505394033641-40c6ad1178d7',k:140,pr:0,c:35,f:0,alg:[],diet:['vegan','vegetarian','glutenfree','lactosefree']},
+      {id:'b1',cat:'bebidas',n:{es:'Sangría de la casa',en:'House sangria'},d:{es:'Vino tinto, frutas de temporada y un toque de naranja. Una copa.',en:'Red wine, seasonal fruit and a touch of orange. One glass.'},p:7.0,img:'1551024709-8f23befc6f87',k:190,pr:0,c:22,f:0,alg:['sulphites'],diet:['vegan','vegetarian','glutenfree']},
+      {id:'b2',cat:'bebidas',n:{es:'Limonada de hierbas',en:'Herb lemonade'},d:{es:'Limonada natural con albahaca y romero, sin azúcares añadidos.',en:'Natural lemonade with basil and rosemary, no added sugar.'},p:4.5,img:'1556679343-c7306c1976bc',k:90,pr:0,c:23,f:0,alg:[],diet:['vegan','vegetarian','glutenfree','lactosefree']},
+      {id:'b3',cat:'bebidas',n:{es:'Café con leche',en:'Café con leche'},d:{es:'Espresso de tueste natural con leche cremada al vapor.',en:'Natural-roast espresso with steamed creamy milk.'},p:2.8,img:'1517248135467-4c7edcad34c4',k:110,pr:6,c:9,f:5,alg:['milk'],diet:['vegetarian']},
+      {id:'e5',cat:'entrantes',n:{es:'Gildas',en:'Gilda skewers'},d:{es:'Banderilla de anchoa, aceituna y guindilla en vinagre. Tres unidades.',en:'Skewer of anchovy, olive and pickled chilli. Three pieces.'},p:6.0,img:'1626082927389-6cd097cee6a6',k:120,pr:8,c:3,f:9,alg:['fish','sulphites'],diet:['glutenfree','lowcarb','highprotein','keto','spicy']},
+      {id:'e6',cat:'entrantes',n:{es:'Ensaladilla rusa',en:'Spanish potato salad'},d:{es:'Patata, zanahoria, guisantes y huevo con mayonesa casera.',en:'Potato, carrot, peas and egg with homemade mayonnaise.'},p:7.0,img:'1623428187969-5da2dcea5ebf',k:290,pr:7,c:20,f:20,alg:['eggs'],diet:['glutenfree','vegetarian']},
+      {id:'m7',cat:'principales',n:{es:'Arroz negro',en:'Black squid-ink rice'},d:{es:'Arroz meloso con tinta de calamar, sepia y alioli suave.',en:'Creamy rice with squid ink, cuttlefish and soft aioli.'},p:18.5,img:'1633896949673-1eb9d131a9b4',k:580,pr:30,c:66,f:16,alg:['molluscs','crustaceans','fish','eggs'],diet:['glutenfree','halal']},
+      {id:'m8',cat:'principales',n:{es:'Carrillera de ternera',en:'Braised beef cheek'},d:{es:'Carrillera al vino tinto, lenta y melosa, con puré de patata.',en:'Red-wine braised beef cheek, slow and tender, with mash.'},p:18.0,img:'1544025162-d76694265947',k:560,pr:40,c:18,f:34,alg:['gluten','sulphites','milk'],diet:['highprotein']},
+      {id:'d4',cat:'postres',n:{es:'Coulant de chocolate',en:'Chocolate fondant'},d:{es:'Bizcocho tibio de chocolate con corazón fundido y helado de vainilla.',en:'Warm chocolate cake with a molten centre and vanilla ice cream.'},p:6.5,img:'1606313564200-e75d5e30476c',k:420,pr:7,c:46,f:24,alg:['gluten','eggs','milk'],diet:['vegetarian']},
+      {id:'d5',cat:'postres',n:{es:'Fruta de temporada',en:'Seasonal fruit'},d:{es:'Selección de fruta fresca cortada del día.',en:'Selection of fresh fruit cut daily.'},p:4.5,img:'1490474418585-ba9bad8fd0ea',k:90,pr:1,c:22,f:0,alg:[],diet:['vegan','vegetarian','glutenfree','lactosefree','halal']},
+      {id:'b4',cat:'bebidas',n:{es:'Zumo de naranja natural',en:'Fresh orange juice'},d:{es:'Naranjas exprimidas al momento, sin azúcares añadidos.',en:'Freshly squeezed oranges, no added sugar.'},p:3.5,img:'1600271886742-f049cd451bba',k:110,pr:2,c:25,f:0,alg:[],diet:['vegan','vegetarian','glutenfree','lactosefree','halal']},
+      {id:'b5',cat:'bebidas',n:{es:'Agua con gas',en:'Sparkling water'},d:{es:'Agua mineral con gas, botella 50 cl.',en:'Sparkling mineral water, 50 cl bottle.'},p:2.5,img:'1523362628745-0c100150b504',k:0,pr:0,c:0,f:0,alg:[],diet:['vegan','vegetarian','glutenfree','lactosefree','halal','keto']},
+      {id:'c1',cat:'cocteles',n:{es:'Mojito clásico',en:'Classic mojito'},d:{es:'Ron blanco, lima, hierbabuena, azúcar y soda.',en:'White rum, lime, mint, sugar and soda.'},p:8.5,img:'1551538827-9c037cb4f32a',k:160,pr:0,c:16,f:0,alg:[],diet:['vegan','vegetarian','glutenfree','lactosefree']},
+      {id:'c2',cat:'cocteles',n:{es:'Margarita',en:'Margarita'},d:{es:'Tequila, triple seco y zumo de lima con borde de sal.',en:'Tequila, triple sec and lime juice with a salted rim.'},p:9.5,img:'1514362545857-3bc16c4c7d1b',k:200,pr:0,c:18,f:0,alg:['sulphites'],diet:['vegan','glutenfree','lactosefree']},
+      {id:'c3',cat:'cocteles',n:{es:'Aperol Spritz',en:'Aperol Spritz'},d:{es:'Aperol, cava brut y un toque de soda con naranja.',en:'Aperol, brut cava and a splash of soda with orange.'},p:8.0,img:'1560512823-829485b8bf24',k:180,pr:0,c:20,f:0,alg:['sulphites'],diet:['vegan','glutenfree','lactosefree']},
+      {id:'c4',cat:'cocteles',n:{es:'Piña Colada',en:'Piña Colada'},d:{es:'Ron, crema de coco y piña natural batida con hielo.',en:'Rum, coconut cream and fresh pineapple blended with ice.'},p:9.0,img:'1497534547324-0ebb3f052e88',k:280,pr:2,c:34,f:6,alg:[],diet:['vegan','vegetarian','glutenfree']},
+      {id:'c5',cat:'cocteles',n:{es:'Gin Tonic Premium',en:'Premium Gin & Tonic'},d:{es:'Ginebra premium, tónica artesana, enebro y cítricos.',en:'Premium gin, craft tonic, juniper and citrus.'},p:10.0,img:'1536935338788-846bb9981813',k:170,pr:0,c:14,f:0,alg:[],diet:['vegan','glutenfree','lactosefree']},
+      {id:'c6',cat:'cocteles',n:{es:'Sangría blanca',en:'White sangria'},d:{es:'Vino blanco, frutas y un toque de cava. Una copa.',en:'White wine, fruit and a touch of cava. One glass.'},p:7.5,img:'1474722883778-792e7990302f',k:190,pr:0,c:21,f:0,alg:['sulphites'],diet:['vegan','glutenfree','lactosefree']}
+    ];
+    this._byId = {};
+    this._dishes.forEach(d=>{ this._byId[d.id]=d; });
+    this.state = {
+      lang: p.defaultLang === 'en' ? 'en' : 'es',
+      theme:'light', cardLayout:'cards', nutriUnit:'kcal', showNutrition:true,
+      search:'', diets:[], excluded:[], cat:'entrantes', allergenOpen:false,
+      cart:{}, cartOpen:false, orderConfirmed:false,
+      modal:null, chatOpen:false, settingsOpen:false,
+      chat:[{role:'bot', key:'greet'}], chatInput:'', toast:null,
+      story:{}, cols:2,
+      cartStep:1, delivery:'table', tableNo:'', special:'', custName:'', custEmail:'', custPhone:'',
+      currency:'EUR', currencyOpen:false
+    };
+  }
+
+  componentDidMount(){
+    this.applyTheme();
+    this.measureCols();
+    this._onResize = ()=>this.measureCols();
+    window.addEventListener('resize', this._onResize);
+    if(!window.lucide){ this._li = setInterval(()=>{ if(window.lucide){ clearInterval(this._li); this.forceUpdate(); } }, 80); }
+  }
+  componentDidUpdate(prev){
+    this.applyTheme();
+    this.measureCols();
+    if(this.chatScrollRef.current && this.state.chat.length !== (prev && prev._cl)) {
+      const el = this.chatScrollRef.current; el.scrollTop = el.scrollHeight;
+    }
+  }
+  componentWillUnmount(){ clearInterval(this._li); clearTimeout(this._tt); if(this._onResize) window.removeEventListener('resize', this._onResize); }
+  measureCols(){
+    const el = this.gridRef.current; if(!el) return;
+    const w = el.getBoundingClientRect().width;
+    if(!w) return;
+    const cols = w < 520 ? 2 : w < 820 ? 3 : 4;
+    if(cols !== this.state.cols) this.setState({cols});
+  }
+  nextMedia(id,len){ this.setState(s=>{ const st=Object.assign({},s.story); st[id]=(((st[id]||0)+1)%len); return {story:st}; }); }
+  prevMedia(id,len){ this.setState(s=>{ const st=Object.assign({},s.story); st[id]=(((st[id]||0)-1+len)%len); return {story:st}; }); }
+
+  applyTheme(){
+    const el = this.rootRef.current; if(!el) return;
+    const t = this.themes[this.state.theme] || this.themes.light;
+    for(const k in t) el.style.setProperty(k, t[k]);
+    const p = this.props || {};
+    if(p.accentColor) el.style.setProperty('--accent', p.accentColor);
+    if(p.accent2Color) el.style.setProperty('--accent2', p.accent2Color);
+    el.style.colorScheme = this.state.theme;
+  }
+
+  icon(name, props){
+    const L = window.lucide; props = props || {};
+    const base = {width:props.width||18,height:props.height||18,viewBox:'0 0 24 24',fill:'none',stroke:'currentColor',strokeWidth:props.sw||2,strokeLinecap:'round',strokeLinejoin:'round','aria-hidden':true,style:{display:'block',flexShrink:0}};
+    let node = null;
+    if(L){ node = (L.icons && L.icons[name]) || L[name]; }
+    if(!node){ return React.createElement('svg', base, React.createElement('circle',{cx:12,cy:12,r:9})); }
+    const arr = Array.isArray(node) ? node : (node.iconNode || []);
+    const kids = arr.map((c,i)=> React.createElement(c[0], Object.assign({key:i}, c[1])));
+    return React.createElement('svg', base, kids);
+  }
+
+  T(){
+    return {
+      es:{ appLabel:'Carta digital de Café del Mar', claim:'Bistró mediterráneo frente al mar', info:'Info',
+        search:'Buscar en la carta…', allergens:'Alérgenos', allergenTitle:'Ocultar platos con:',
+        cart:'Tu pedido', cartEmpty:'Tu carrito está vacío', cartEmptyHint:'Añade platos desde la carta para empezar.',
+        total:'Total', pay:'Pagar ahora', orderTitle:'¡Pedido enviado!', orderMsg:'Pedido enviado a cocina · pago simulado', newOrder:'Nuevo pedido',
+        stepCart:'Carrito', stepSugg:'Sugerencias', stepPay:'Pagar', suggTitle:'¿Olvidaste algo?', suggSub:'Nuestro SmartWaiter eligió estos según lo que has seleccionado.',
+        backToCart:'Volver al carrito', continueShop:'Continuar a la compra', continueBtn:'Continuar', deliveryType:'Tipo de entrega',
+        dTable:'Servicio en mesa', dTableSub:'Serviremos tu pedido en tu mesa', dPickup:'Recoger pedido', dPickupSub:'Recogerás tu pedido en el mostrador',
+        dDelivery:'Entrega a domicilio', dDeliverySub:'Este restaurante aún no ha activado la entrega a domicilio',
+        tableNo:'Número de mesa', tableNoPh:'Ingresa el número de mesa', special:'Solicitudes especiales', specialPh:'Cualquier alergia o instrucciones especiales…',
+        custInfo:'Información del cliente', fullName:'Nombre completo', fullNamePh:'Ingresa tu nombre completo', email:'Correo electrónico', emailPh:'Ingresa tu correo electrónico', phone:'Teléfono', phonePh:'Ingresa tu número de teléfono',
+        orderSummary:'Resumen del pedido', createOrder:'Crear pedido', reqMissing:'Completa los campos obligatorios', addBtn:'Añadir',
+        tagDessert:'Dulce final', tagChef:'Selección del chef', tagStarter:'Para empezar', tagDrink:'Para acompañar', tagCocktail:'Para brindar',
+        waiter:'Llamar camarero', bill:'Pedir la cuenta',
+        greet:'Hola, soy SmartWaiter. ¿Qué te apetece hoy? Cuéntame tus preferencias y te recomiendo platos.', online:'En línea',
+        chipCeliac:'Soy celíaco', chipVegan:'Opción vegana', chipLight:'Algo ligero', chipReco:'Recomiéndame',
+        sendPh:'Escribe un mensaje…', send:'Enviar',
+        nutrition:'Información nutricional', energy:'Energía', protein:'Proteínas', carbs:'Carbohidratos', fat:'Grasas',
+        allergensLabel:'Alérgenos', noAllergens:'Sin alérgenos declarados', addToCart:'Añadir al pedido',
+        settings:'Ajustes', theme:'Tema', light:'Claro', dark:'Oscuro', cardLayout:'Diseño de tarjeta', listOpt:'Lista', cardsOpt:'Tarjetas', compactOpt:'Compacto',
+        nutriUnit:'Unidad nutricional', showNutrition:'Mostrar nutrición', language:'Idioma',
+        addAria:'Añadir al carrito', closeAria:'Cerrar', prevMedia:'Anterior', nextMedia:'Siguiente', reviewBtn:'Reseña', reviews:'1.243 reseñas',
+        hoursLabel:'Horario', hours:'Lun–Dom · 9:00–24:00', addressLabel:'Dónde estamos', address:'Paseo del Faro 12, Puerto Viejo', followUs:'Síguenos', googleReviews:'Ver reseñas en Google', made:'Hecho con SmartCarta',
+        noResults:'Sin resultados', noResultsHint:'Prueba a quitar algún filtro o cambiar la búsqueda.',
+        added:'Añadido al pedido', waiterToast:'Un camarero viene a tu mesa', billToast:'Te llevamos la cuenta enseguida', infoToast:'Paseo del Faro 12 · Puerto Viejo · 9:00–24:00' },
+      en:{ appLabel:'Café del Mar digital menu', claim:'Mediterranean bistro by the sea', info:'Info',
+        search:'Search the menu…', allergens:'Allergens', allergenTitle:'Hide dishes containing:',
+        cart:'Your order', cartEmpty:'Your cart is empty', cartEmptyHint:'Add dishes from the menu to get started.',
+        total:'Total', pay:'Pay now', orderTitle:'Order sent!', orderMsg:'Order sent to kitchen · simulated payment', newOrder:'New order',
+        stepCart:'Cart', stepSugg:'Suggestions', stepPay:'Pay', suggTitle:'Forgot something?', suggSub:'Our SmartWaiter picked these based on your selection.',
+        backToCart:'Back to cart', continueShop:'Continue to checkout', continueBtn:'Continue', deliveryType:'Delivery type',
+        dTable:'Table service', dTableSub:"We'll bring your order to your table", dPickup:'Pick up', dPickupSub:'Pick up your order at the counter',
+        dDelivery:'Home delivery', dDeliverySub:'This restaurant has not enabled home delivery yet',
+        tableNo:'Table number', tableNoPh:'Enter your table number', special:'Special requests', specialPh:'Any allergies or special instructions…',
+        custInfo:'Customer information', fullName:'Full name', fullNamePh:'Enter your full name', email:'Email', emailPh:'Enter your email', phone:'Phone', phonePh:'Enter your phone number',
+        orderSummary:'Order summary', createOrder:'Create order', reqMissing:'Please complete the required fields', addBtn:'Add',
+        tagDessert:'Sweet finish', tagChef:"Chef's pick", tagStarter:'To start', tagDrink:'To pair', tagCocktail:'To toast',
+        waiter:'Call waiter', bill:'Ask for the bill',
+        greet:"Hi, I'm SmartWaiter. What are you in the mood for? Tell me your preferences and I'll recommend dishes.", online:'Online',
+        chipCeliac:"I'm coeliac", chipVegan:'Vegan option', chipLight:'Something light', chipReco:'Recommend me',
+        sendPh:'Type a message…', send:'Send',
+        nutrition:'Nutrition facts', energy:'Energy', protein:'Protein', carbs:'Carbs', fat:'Fat',
+        allergensLabel:'Allergens', noAllergens:'No declared allergens', addToCart:'Add to order',
+        settings:'Settings', theme:'Theme', light:'Light', dark:'Dark', cardLayout:'Card layout', listOpt:'List', cardsOpt:'Cards', compactOpt:'Compact',
+        nutriUnit:'Nutrition unit', showNutrition:'Show nutrition', language:'Language',
+        addAria:'Add to cart', closeAria:'Close', prevMedia:'Previous', nextMedia:'Next', reviewBtn:'Review', reviews:'1,243 reviews',
+        hoursLabel:'Opening hours', hours:'Mon–Sun · 9:00–24:00', addressLabel:'Find us', address:'12 Lighthouse Promenade, Old Harbour', followUs:'Follow us', googleReviews:'See Google reviews', made:'Made with SmartCarta',
+        noResults:'No results', noResultsHint:'Try removing a filter or changing your search.',
+        added:'Added to order', waiterToast:'A waiter is on the way', billToast:'The bill is on its way', infoToast:'12 Lighthouse Promenade · Old Harbour · 9:00–24:00' }
+    };
+  }
+  RES(){
+    return {
+      es:{ glutenfree:'Perfecto, aquí tienes opciones sin gluten que te encantarán:', vegan:'Estas opciones veganas están deliciosas:', vegetarian:'Opciones vegetarianas que te van a gustar:', lactosefree:'Sin lactosa y muy ricas:', spicy:'¿Te gusta el picante? Prueba esto:', highprotein:'Platos cargados de proteína:', light:'Algo ligero para hoy:', reco:'Mis recomendaciones de la casa:', none:'No encuentro nada para eso ahora mismo, ¿probamos otra cosa?' },
+      en:{ glutenfree:"Great, here are gluten-free options you'll love:", vegan:'These vegan options are delicious:', vegetarian:"Vegetarian options you'll enjoy:", lactosefree:'Lactose-free and tasty:', spicy:'Like it spicy? Try these:', highprotein:'Protein-packed picks:', light:'Something light for today:', reco:'My house recommendations:', none:"I can't find anything for that right now — shall we try something else?" }
+    };
+  }
+
+  showToast(msg){ clearTimeout(this._tt); this.setState({toast:msg}); this._tt = setTimeout(()=>this.setState({toast:null}), 2600); }
+  toggleDiet(k){ this.setState(s=>({diets: s.diets.includes(k) ? s.diets.filter(x=>x!==k) : s.diets.concat(k)})); }
+  toggleAllergen(k){ this.setState(s=>({excluded: s.excluded.includes(k) ? s.excluded.filter(x=>x!==k) : s.excluded.concat(k)})); }
+  addToCart(id){ this.setState(s=>{ const c=Object.assign({},s.cart); c[id]=(c[id]||0)+1; return {cart:c}; }); this.showToast(this.T()[this.state.lang].added); }
+  inc(id){ this.setState(s=>{ const c=Object.assign({},s.cart); c[id]=(c[id]||0)+1; return {cart:c}; }); }
+  dec(id){ this.setState(s=>{ const c=Object.assign({},s.cart); c[id]=(c[id]||0)-1; if(c[id]<=0) delete c[id]; return {cart:c}; }); }
+  pay(){ const n=Object.keys(this.state.cart).length; if(!n) return; this.setState({orderConfirmed:true}); }
+  newOrder(){ this.setState({cart:{}, orderConfirmed:false, cartOpen:false, cartStep:1, tableNo:'', special:'', custName:'', custEmail:'', custPhone:''}); }
+  createOrder(){ const S=this.state, T=this.T()[S.lang]; if(!S.custName.trim() || !S.custEmail.trim() || (S.delivery==='table' && !S.tableNo.trim())){ this.showToast(T.reqMissing); return; } this.setState({orderConfirmed:true}); }
+  openModal(id){ this.setState({modal:id}); }
+
+  matchIntent(text){ const q=(text||'').toLowerCase();
+    if(/celi|celí|coeli|glut/.test(q)) return 'glutenfree';
+    if(/vegan|vegano/.test(q)) return 'vegan';
+    if(/veget/.test(q)) return 'vegetarian';
+    if(/lact/.test(q)) return 'lactosefree';
+    if(/pican|spicy|chil|pic/.test(q)) return 'spicy';
+    if(/prote/.test(q)) return 'highprotein';
+    if(/liger|ligh|light|sano|health|salud/.test(q)) return 'light';
+    return 'reco';
+  }
+  pickDishes(intent){
+    const ds = this._dishes;
+    if(intent==='light') return ds.slice().sort((a,b)=>a.k-b.k).slice(0,3).map(d=>d.id);
+    if(intent==='reco') return ['m1','m5','d2'];
+    const dk = {glutenfree:'glutenfree',vegan:'vegan',vegetarian:'vegetarian',lactosefree:'lactosefree',spicy:'spicy',highprotein:'highprotein'}[intent];
+    if(!dk) return ['m1','m5','d2'];
+    return ds.filter(d=>d.diet.includes(dk)).slice(0,3).map(d=>d.id);
+  }
+  respond(intent){ const ids=this.pickDishes(intent); return {role:'bot', rk: ids.length?intent:'none', dishIds: ids}; }
+  pushMsgs(arr){ this.setState(s=>({chat: s.chat.concat(arr)})); }
+  sendChip(intent,label){ this.pushMsgs([{role:'user',text:label}, this.respond(intent)]); }
+  sendText(){ const t=(this.state.chatInput||'').trim(); if(!t) return; this.pushMsgs([{role:'user',text:t}, this.respond(this.matchIntent(t))]); this.setState({chatInput:''}); }
+
+  renderVals(){
+    const S=this.state, lang=S.lang, T=this.T()[lang], RES=this.RES()[lang];
+    const ic=(n,w)=>this.icon(n,{width:w||18,height:w||18});
+    const dietLabel=k=>this.DIETS[k][lang];
+    const algLabel=k=>this.ALG[k][lang];
+    const cur=this.CUR[S.currency]||this.CUR.EUR;
+    const fmt=n=> (n*cur.rate).toFixed(2).replace('.',',')+' '+cur.sym;
+    const kcal=d=> S.nutriUnit==='kcal' ? d.k+' kcal' : Math.round(d.k*4.184)+' kJ';
+    const imgUrl=id=>'https://images.unsplash.com/photo-'+id+'?auto=format&fit=crop&w=640&q=70';
+    const stripe='repeating-linear-gradient(135deg,var(--surface2,#f1ece2),var(--surface2,#f1ece2) 10px,rgba(0,0,0,.04) 10px,rgba(0,0,0,.04) 20px)';
+    const imgBg=url=>({backgroundImage:'url("'+url+'"), '+stripe, backgroundSize:'cover, auto', backgroundPosition:'center center, 0 0', backgroundRepeat:'no-repeat, repeat'});
+    const heroStyle=Object.assign({position:'relative',height:'188px'}, imgBg(imgUrl('1559339352-11d035aa65de')));
+
+    const dietPillsFor = d => d.diet.map(k=>({key:k, label:dietLabel(k), icon:this.icon(this.DIETS[k].ic,{width:12,height:12})}));
+
+    // filters
+    const q=S.search.trim().toLowerCase();
+    const mSearch=d=> !q || (d.n.es+' '+d.n.en+' '+d.d.es+' '+d.d.en).toLowerCase().includes(q);
+    const mDiet=d=> S.diets.every(k=> d.diet.includes(k));
+    const mAlg=d=> !d.alg.some(a=> S.excluded.includes(a));
+    const passNoCat=d=> mSearch(d)&&mDiet(d)&&mAlg(d);
+
+    const L=S.cardLayout;
+    const cardStyle = L==='cards'
+      ? {display:'flex',flexDirection:'column',background:'var(--surface,#fff)',borderRadius:'18px',overflow:'hidden',border:'1px solid var(--border,#e8e0d4)',boxShadow:'0 1px 3px rgba(0,0,0,.04)',cursor:'pointer'}
+      : {display:'flex',flexDirection:'row',gap:'12px',alignItems:'center',background:'var(--surface,#fff)',borderRadius:'16px',border:'1px solid var(--border,#e8e0d4)',padding: L==='compact'?'9px':'9px',boxShadow:'0 1px 3px rgba(0,0,0,.04)',cursor:'pointer'};
+    const imgDims = L==='cards' ? {position:'relative',width:'100%',height:'150px',overflow:'hidden',flexShrink:0}
+      : {position:'relative',width:'92px',height:'92px',borderRadius:'12px',overflow:'hidden',flexShrink:0};
+    const bodyStyle = L==='cards' ? {padding:'13px 14px 14px'} : {flex:1,minWidth:0,padding:'2px 4px 2px 0'};
+
+    const isGrid = L==='cards';
+    const cols = S.cols || 2;
+    const listWrapStyle = isGrid
+      ? {display:'grid', gridTemplateColumns:'repeat('+cols+',minmax(0,1fr))', gap:'12px'}
+      : {display:'flex', flexDirection:'column', gap:'12px'};
+    const pool = this._dishes.map(x=>x.img);
+    // To use real clips, set a dish id to an .mp4 URL string and restore a <video> in buildMediaEl.
+    const VIDS = { e1:true, m1:true, m4:true, m5:true, d2:true, b3:true };
+    const mediaFor=(d,i)=>{ const a=[{type:'img',url:imgUrl(d.img)}]; if(VIDS[d.id]) a.push({type:'video',url:imgUrl(pool[(i*2+9)%pool.length])}); a.push({type:'img',url:imgUrl(pool[(i*3+5)%pool.length])}); a.push({type:'img',url:imgUrl(pool[(i*7+2)%pool.length])}); return a; };
+    const buildMediaEl=(m,idx)=>{ const anim={animation: m.type==='video' ? 'scMedia .4s ease, scZoom 7s ease-in-out infinite alternate' : 'scMedia .4s ease', transformOrigin:'center center'};
+      return React.createElement('div',{key:(m.type==='video'?'v':'i')+idx,style:Object.assign({position:'absolute',inset:0},imgBg(m.url),anim)}); };
+    const visibleDishes = this._dishes.filter(d=> d.cat===S.cat && passNoCat(d)).map((d,i)=>{
+      const base = { id:d.id, name:d.n[lang], desc:d.d[lang], priceStr:fmt(d.p), kcalStr:kcal(d),
+        dietPills: dietPillsFor(d),
+        flameOrDot: d.diet.includes('spicy') ? this.icon('Flame',{width:12,height:12}) : null,
+        addIcon: this.icon('Plus',{width:18,height:18}),
+        isStory:isGrid, isPlain:!isGrid,
+        onCard: ()=>this.openModal(d.id),
+        onAdd: (e)=>{ if(e&&e.stopPropagation) e.stopPropagation(); this.addToCart(d.id); } };
+      if(isGrid){
+        const media = mediaFor(d,i); const len=media.length;
+        const idx = Math.min(S.story[d.id]||0, len-1); const cur=media[idx];
+        base.storyStyle = {position:'relative',aspectRatio:'3 / 4',borderRadius:'16px',overflow:'hidden',background:'#0c0c0c',boxShadow:'0 3px 14px rgba(0,0,0,.14)'};
+        base.mediaEl = buildMediaEl(cur, idx);
+        base.segments = media.map((mm,j)=>({style:{flex:1,height:'3px',borderRadius:'2px',background: j<=idx?'rgba(255,255,255,.96)':'rgba(255,255,255,.4)',transition:'background .2s'}}));
+        base.isVideo = cur.type==='video';
+        base.dietPillsLite = d.diet.slice(0,2).map(k=>({key:k,label:dietLabel(k),icon:this.icon(this.DIETS[k].ic,{width:11,height:11})}));
+        base.onPrev = (e)=>{ if(e&&e.stopPropagation) e.stopPropagation(); this.prevMedia(d.id,len); };
+        base.onNext = (e)=>{ if(e&&e.stopPropagation) e.stopPropagation(); this.nextMedia(d.id,len); };
+      } else {
+        base.cardStyle = cardStyle;
+        base.imgStyle = Object.assign({}, imgDims, imgBg(imgUrl(d.img)));
+        base.bodyStyle = bodyStyle;
+        base.showImg = L!=='compact'; base.showDesc = L==='cards'; base.showPills = L!=='compact'; base.compactMeta = L==='compact';
+      }
+      return base;
+    });
+
+    const categories = this.CATS.map(c=>{
+      const active = S.cat===c.key;
+      const count = this._dishes.filter(d=> d.cat===c.key && passNoCat(d)).length;
+      return { key:c.key, label:c[lang], count, active,
+        onClick:()=>this.setState({cat:c.key}),
+        style: Object.assign({display:'flex',alignItems:'center',gap:'7px',whiteSpace:'nowrap',padding:'9px 15px',borderRadius:'22px',fontSize:'14px',fontWeight:700,cursor:'pointer',fontFamily:'inherit',flexShrink:0,transition:'all .15s'},
+          active ? {background:'var(--accent,#127a86)',color:'var(--accentText,#fff)',border:'1px solid var(--accent,#127a86)'} : {background:'var(--surface,#fff)',color:'var(--text)',border:'1px solid var(--border,#e8e0d4)'}) };
+    });
+
+    const chipStyle = active => Object.assign({display:'flex',alignItems:'center',gap:'6px',whiteSpace:'nowrap',padding:'8px 13px',borderRadius:'20px',fontSize:'13px',fontWeight:600,cursor:'pointer',fontFamily:'inherit',flexShrink:0,transition:'all .15s'},
+      active ? {background:'var(--accent,#127a86)',color:'var(--accentText,#fff)',border:'1px solid var(--accent,#127a86)'} : {background:'var(--surface,#fff)',color:'var(--text)',border:'1px solid var(--border,#e8e0d4)'});
+    const dietChips = this.DIET_ORDER.map(k=>({ key:k, label:dietLabel(k), active:S.diets.includes(k), icon:this.icon(this.DIETS[k].ic,{width:14,height:14}), style:chipStyle(S.diets.includes(k)), onClick:()=>this.toggleDiet(k) }));
+
+    const algChipStyle = ex => Object.assign({padding:'7px 12px',borderRadius:'18px',fontSize:'12.5px',fontWeight:600,cursor:'pointer',fontFamily:'inherit',transition:'all .15s'},
+      ex ? {background:'var(--accent2,#d4694a)',color:'#fff',border:'1px solid var(--accent2,#d4694a)'} : {background:'var(--surface,#fff)',color:'var(--text)',border:'1px solid var(--border,#e8e0d4)'});
+    const allergenChips = this.ALG_ORDER.map(k=>({ key:k, label:algLabel(k), excluded:S.excluded.includes(k), style:algChipStyle(S.excluded.includes(k)), onClick:()=>this.toggleAllergen(k) }));
+    const wide = (S.cols||2) >= 3;
+    const searchRowStyle = wide ? {display:'flex',gap:'10px',alignItems:'stretch'} : {display:'flex',flexDirection:'column',gap:'10px'};
+    const searchCellStyle = wide ? {flex:'7 1 0%',minWidth:0} : {width:'100%'};
+    const allergenCellStyle = wide ? {flex:'3 1 0%',minWidth:0} : {width:'100%'};
+    const allergenBtnStyle = {width:'100%',height:'100%',minHeight:'46px',display:'flex',alignItems:'center',gap:'9px',padding:'0 14px',borderRadius:'14px',border:'1px solid var(--border,#e8e0d4)',background:'var(--surface,#fff)',color:'var(--text)',fontSize:'14px',fontWeight:600,cursor:'pointer',fontFamily:'inherit'};
+
+    // cart
+    const ids=Object.keys(S.cart);
+    const cartItems = ids.map(id=>{ const d=this._byId[id]; const qty=S.cart[id]; return { id, name:d.n[lang], imgStyle: Object.assign({width:'52px',height:'52px',borderRadius:'12px',overflow:'hidden',flexShrink:0}, imgBg(imgUrl(d.img))), priceStr:fmt(d.p), lineStr:fmt(d.p*qty), qty, plus:this.icon('Plus',{width:15,height:15}), minus:this.icon('Minus',{width:15,height:15}), onInc:()=>this.inc(id), onDec:()=>this.dec(id) }; });
+    const cartCount = ids.reduce((a,id)=>a+S.cart[id],0);
+    const cartTotal = ids.reduce((a,id)=>a+this._byId[id].p*S.cart[id],0);
+    const cartEmpty = ids.length===0;
+    // checkout flow
+    const cartStep=S.cartStep, isStep1=cartStep===1, isStep2=cartStep===2, isStep3=cartStep===3;
+    const cartSteps=[{n:1,label:T.stepCart},{n:2,label:T.stepSugg},{n:3,label:T.stepPay}].map(s=>{ const done=s.n<cartStep, active=s.n===cartStep; return {
+      n:s.n, label:s.label, hasLine:s.n<3, mark: done? this.icon('Check',{width:14,height:14}) : String(s.n),
+      onClick: s.n<cartStep ? (()=>this.setState({cartStep:s.n})) : (()=>{}),
+      circleStyle:{width:'26px',height:'26px',borderRadius:'50%',display:'grid',placeItems:'center',fontSize:'12px',fontWeight:800,flexShrink:0,background:(done||active)?'var(--accent,#127a86)':'var(--surface2,#f1ece2)',color:(done||active)?'var(--accentText,#fff)':'var(--muted,#8a8275)'},
+      labelStyle:{fontSize:'12.5px',fontWeight:700,color:active?'var(--text)':'var(--muted,#8a8275)',whiteSpace:'nowrap'},
+      lineStyle:{flex:1,height:'2px',margin:'0 8px',borderRadius:'2px',background:s.n<cartStep?'var(--accent,#127a86)':'var(--border,#e8e0d4)'}
+    }; });
+    const catTag={postres:T.tagDessert,principales:T.tagChef,entrantes:T.tagStarter,bebidas:T.tagDrink,cocteles:T.tagCocktail};
+    const suggOrder={postres:0,cocteles:1,bebidas:2,entrantes:3,principales:4};
+    const suggestions=this._dishes.filter(d=>!S.cart[d.id]).sort((a,b)=>suggOrder[a.cat]-suggOrder[b.cat]).slice(0,3).map(d=>({
+      id:d.id, tag:catTag[d.cat], name:d.n[lang], desc:d.d[lang], priceStr:fmt(d.p),
+      imgStyle:Object.assign({width:'70px',height:'70px',borderRadius:'12px',flexShrink:0},imgBg(imgUrl(d.img))),
+      addIcon:this.icon('Plus',{width:16,height:16}), onAdd:()=>this.addToCart(d.id)
+    }));
+    const delOpts=[{key:'table',title:T.dTable,sub:T.dTableSub,disabled:false},{key:'pickup',title:T.dPickup,sub:T.dPickupSub,disabled:false},{key:'delivery',title:T.dDelivery,sub:T.dDeliverySub,disabled:true}].map(o=>{ const sel=S.delivery===o.key; return {
+      key:o.key, title:o.title, sub:o.sub, selected:sel, disabled:o.disabled,
+      onClick:o.disabled?(()=>{}):(()=>this.setState({delivery:o.key})),
+      style:{display:'flex',alignItems:'flex-start',gap:'11px',width:'100%',textAlign:'left',padding:'13px',borderRadius:'13px',cursor:o.disabled?'not-allowed':'pointer',fontFamily:'inherit',transition:'all .15s',border:'1px solid '+(sel?'var(--accent,#127a86)':'var(--border,#e8e0d4)'),background:sel?'rgba(18,122,134,.07)':'var(--surface,#fff)',opacity:o.disabled?.55:1},
+      radioStyle:{width:'20px',height:'20px',borderRadius:'50%',flexShrink:0,marginTop:'1px',border:'2px solid '+(sel?'var(--accent,#127a86)':'var(--border,#cfc8bd)'),display:'grid',placeItems:'center'},
+      dot: sel? React.createElement('span',{style:{width:'10px',height:'10px',borderRadius:'50%',background:'var(--accent,#127a86)'}}) : null
+    }; });
+    const showTable=S.delivery==='table';
+
+    // modal
+    let modal=null;
+    if(S.modal){ const d=this._byId[S.modal];
+      modal = { name:d.n[lang], desc:d.d[lang], imgStyle: Object.assign({position:'relative',height:'200px',flexShrink:0}, imgBg(imgUrl(d.img))), priceStr:fmt(d.p), kcalStr:kcal(d),
+        dietPills: dietPillsFor(d), hasDiets:d.diet.length>0,
+        macros:[{label:T.protein,val:d.pr+' g'},{label:T.carbs,val:d.c+' g'},{label:T.fat,val:d.f+' g'}],
+        allergens:d.alg.map(k=>({label:algLabel(k)})), hasAllergens:d.alg.length>0, noAllergens:d.alg.length===0,
+        showNutrition:S.showNutrition, onAdd:()=>{ this.addToCart(d.id); } };
+    }
+
+    // chat
+    const chatMsgs = S.chat.map((m,i)=>{
+      const isBot = m.role!=='user';
+      const text = m.key ? T[m.key] : (m.rk ? RES[m.rk] : m.text);
+      const dishes = (m.dishIds||[]).map(id=>{ const d=this._byId[id]; return { name:d.n[lang], priceStr:fmt(d.p), imgStyle: Object.assign({width:'44px',height:'44px',borderRadius:'9px',overflow:'hidden',flexShrink:0}, imgBg(imgUrl(d.img))), chev:this.icon('ChevronRight',{width:16,height:16}), onClick:()=>{ this.setState({chatOpen:false}); this.openModal(id); } }; });
+      return { key:i, isBot, text, dishes, hasDishes:dishes.length>0,
+        rowStyle:{display:'flex', justifyContent: isBot?'flex-start':'flex-end'},
+        bubbleStyle:{padding:'10px 14px', borderRadius: isBot?'4px 16px 16px 16px':'16px 16px 4px 16px', background: isBot?'var(--surface,#fff)':'var(--accent,#127a86)', color: isBot?'var(--text)':'var(--accentText,#fff)', fontSize:'14px', lineHeight:1.4, border: isBot?'1px solid var(--border,#e8e0d4)':'none', boxShadow: isBot?'0 1px 2px rgba(0,0,0,.04)':'none'} };
+    });
+    const chatChips = [ {intent:'glutenfree',label:T.chipCeliac},{intent:'vegan',label:T.chipVegan},{intent:'light',label:T.chipLight},{intent:'reco',label:T.chipReco} ].map(c=>({ label:c.label, onClick:()=>this.sendChip(c.intent,c.label) }));
+
+    // settings
+    const segStyle = active => Object.assign({flex:1,padding:'10px 6px',borderRadius:'9px',border:'none',fontSize:'13.5px',fontWeight:700,cursor:'pointer',fontFamily:'inherit',transition:'all .15s'},
+      active ? {background:'var(--surface,#fff)',color:'var(--accent,#127a86)',boxShadow:'0 1px 3px rgba(0,0,0,.12)'} : {background:'transparent',color:'var(--muted,#8a8275)'});
+    const settingsGroups = [
+      { title:T.cardLayout, opts:[ {label:T.listOpt,active:L==='list',onClick:()=>this.setState({cardLayout:'list'})}, {label:T.cardsOpt,active:L==='cards',onClick:()=>this.setState({cardLayout:'cards'})}, {label:T.compactOpt,active:L==='compact',onClick:()=>this.setState({cardLayout:'compact'})} ] },
+      { title:T.nutriUnit, opts:[ {label:'kcal',active:S.nutriUnit==='kcal',onClick:()=>this.setState({nutriUnit:'kcal'})}, {label:'kJ',active:S.nutriUnit==='kJ',onClick:()=>this.setState({nutriUnit:'kJ'})} ] }
+    ].map(g=>({ title:g.title, opts:g.opts.map(o=>({label:o.label,active:o.active,onClick:o.onClick,style:segStyle(o.active)})) }));
+    const nutSwitchStyle = {width:'48px',height:'28px',borderRadius:'14px',border:'none',cursor:'pointer',padding:'2px',display:'flex',alignItems:'center',justifyContent: S.showNutrition?'flex-end':'flex-start',background: S.showNutrition?'var(--accent,#127a86)':'var(--border,#ccc)',transition:'all .15s'};
+    const nutKnobStyle = {width:'24px',height:'24px',borderRadius:'50%',background:'#fff',display:'block',boxShadow:'0 1px 3px rgba(0,0,0,.25)'};
+    const langBtnA = {display:'grid',placeItems:'center',padding:'4px',borderRadius:'7px',border:'none',cursor:'pointer',background:'transparent',opacity:1,boxShadow:'0 0 0 2px var(--accent,#127a86)',transition:'all .15s'};
+    const langBtnI = {display:'grid',placeItems:'center',padding:'4px',borderRadius:'7px',border:'none',cursor:'pointer',background:'transparent',opacity:.4,boxShadow:'none',transition:'all .15s'};
+    const currencyOpts = Object.keys(this.CUR).map(code=>{ const c=this.CUR[code]; const active=S.currency===code; return { code, sym:c.sym, name:c.name[lang], active, check:this.icon('Check',{width:15,height:15}), onClick:()=>this.setState({currency:code, currencyOpen:false}), style:{display:'flex',alignItems:'center',gap:'8px',width:'100%',padding:'9px 10px',borderRadius:'9px',border:'none',cursor:'pointer',fontFamily:'inherit',fontSize:'13px',fontWeight:600,background:active?'var(--surface2,#f1ece2)':'transparent',color:'var(--text)'} }; });
+
+    return {
+      rootRef:this.rootRef, chatScrollRef:this.chatScrollRef,
+      txt:T, brand:this.props.brandName||'Café del Mar',
+      heroStyle, noop:(e)=>{ if(e) e.preventDefault(); },
+      // search
+      search:S.search, hasSearch:S.search.length>0, onSearch:e=>this.setState({search:e.target.value}), clearSearch:()=>this.setState({search:''}),
+      // filters
+      dietChips, allergenChips, allergenOpen:S.allergenOpen, toggleAllergenPanel:()=>this.setState(s=>({allergenOpen:!s.allergenOpen})),
+      searchRowStyle, searchCellStyle, allergenCellStyle, allergenBtnStyle,
+      hasExcluded:S.excluded.length>0, excludedCount:S.excluded.length, chevronT: S.allergenOpen?'rotate(180deg)':'rotate(0deg)',
+      categories, visibleDishes, listWrapStyle, gridRef:this.gridRef, noResults: visibleDishes.length===0,
+      // cart
+      cartCount, hasCart:cartCount>0, cartItems, cartTotalStr:fmt(cartTotal),
+      cartOpen:S.cartOpen, openCart:()=>this.setState({cartOpen:true, cartStep:1}), closeCart:()=>this.setState({cartOpen:false}),
+      orderConfirmed:S.orderConfirmed, cartShowEmpty: !S.orderConfirmed && cartEmpty && S.cartStep===1, cartShowFlow: !S.orderConfirmed && !(cartEmpty && S.cartStep===1),
+      newOrder:()=>this.newOrder(),
+      // checkout flow
+      cartSteps, isStep1, isStep2, isStep3, suggestions, deliveryOpts:delOpts, showTable,
+      goStep1:()=>this.setState({cartStep:1}), goStep2:()=>this.setState({cartStep:2}), goStep3:()=>this.setState({cartStep:3}), createOrder:()=>this.createOrder(),
+      tableNo:S.tableNo, onTableNo:e=>this.setState({tableNo:e.target.value}),
+      special:S.special, onSpecial:e=>this.setState({special:e.target.value}),
+      custName:S.custName, onCustName:e=>this.setState({custName:e.target.value}),
+      custEmail:S.custEmail, onCustEmail:e=>this.setState({custEmail:e.target.value}),
+      custPhone:S.custPhone, onCustPhone:e=>this.setState({custPhone:e.target.value}),
+      fieldStyle:{width:'100%',padding:'12px 14px',borderRadius:'12px',border:'1px solid var(--border,#e8e0d4)',background:'var(--surface,#fff)',color:'var(--text)',fontSize:'15px',fontFamily:'inherit'},
+      labelStyle:{fontSize:'13px',fontWeight:600,marginBottom:'6px',display:'block'},
+      sectionTitleStyle:{fontSize:'12px',fontWeight:700,color:'var(--muted,#8a8275)',textTransform:'uppercase',letterSpacing:'.05em',marginBottom:'10px'},
+      // fabs
+      callWaiter:()=>this.showToast(T.waiterToast), requestBill:()=>this.showToast(T.billToast),
+      openInfo:()=>this.showToast(T.infoToast),
+      // header controls
+      toggleTheme:()=>this.setState(s=>({theme:s.theme==='light'?'dark':'light'})),
+      icTheme: S.theme==='light' ? ic('Moon',16) : ic('Sun',16),
+      esActive: lang==='es', enActive: lang==='en',
+      onEs:()=>this.setState({lang:'es'}), onEn:()=>this.setState({lang:'en'}),
+      esBtnStyle: lang==='es' ? langBtnA : langBtnI, enBtnStyle: lang==='en' ? langBtnA : langBtnI,
+      flagEs:{display:'block',width:'16px',height:'11px',borderRadius:'3px',backgroundImage:'linear-gradient(#c60b1e 0 25%, #ffc400 25% 75%, #c60b1e 75% 100%)',boxShadow:'inset 0 0 0 1px rgba(0,0,0,.1)'},
+      flagEn:{display:'block',width:'16px',height:'11px',borderRadius:'3px',backgroundColor:'#ffffff',backgroundImage:'linear-gradient(90deg,transparent 41%,#ce1124 41% 59%,transparent 59%),linear-gradient(0deg,transparent 36%,#ce1124 36% 64%,transparent 64%)',boxShadow:'inset 0 0 0 1px rgba(0,0,0,.12)'},
+      googleHref:'https://www.google.com/search?q=Caf%C3%A9+del+Mar+rese%C3%B1as',
+      icFacebook:ic('Facebook',18), icTwitter:ic('Twitter',18), icYoutube:ic('Youtube',18), icChevronR:ic('ChevronRight',18),
+      currency:S.currency, currencyOpen:S.currencyOpen, toggleCurrency:()=>this.setState(s=>({currencyOpen:!s.currencyOpen})), closeCurrency:()=>this.setState({currencyOpen:false}),
+      curSym:cur.sym, curCode:S.currency, curChevron:S.currencyOpen?'rotate(180deg)':'rotate(0deg)', currencyOpts, icStarSm:ic('Star',13),
+      // modal
+      modal, closeModal:()=>this.setState({modal:null}),
+      // chat
+      chatOpen:S.chatOpen, openChat:()=>this.setState({chatOpen:true, _cl:S.chat.length}), closeChat:()=>this.setState({chatOpen:false}),
+      chatMsgs, chatChips, chatInput:S.chatInput, onChatInput:e=>this.setState({chatInput:e.target.value}), submitChat:(e)=>{ e.preventDefault(); this.sendText(); },
+      // settings
+      settingsOpen:S.settingsOpen, openSettings:()=>this.setState({settingsOpen:true}), closeSettings:()=>this.setState({settingsOpen:false}),
+      settingsGroups, showNutrition:S.showNutrition, toggleNutrition:()=>this.setState(s=>({showNutrition:!s.showNutrition})), nutSwitchStyle, nutKnobStyle,
+      // toast
+      toastMsg:S.toast,
+      stop:(e)=>{ if(e&&e.stopPropagation) e.stopPropagation(); },
+      // icons (chrome)
+      icSettings:ic('Settings',20), icTune:ic('SlidersHorizontal',16), icStar:ic('Star',16), icInfo:ic('Info',15), icSearch:ic('Search',18), icSearchBig:ic('SearchX',26),
+      icX:ic('X',18), icShield:ic('ShieldAlert',17), icChevron:ic('ChevronDown',17),
+      icCart:ic('ShoppingCart',22), icCartBig:ic('ShoppingCart',26), icSpark:ic('Sparkles',18), icSpark2:ic('Sparkles',14),
+      icBell:ic('Bell',20), icReceipt:ic('ReceiptText',20), icSend:ic('Send',18), icCheck:ic('Check',15), icCheckBig:ic('CircleCheck',46),
+      icClock:ic('Clock',18), icMap:ic('MapPin',18), icInsta:ic('Instagram',18), icCard:ic('CreditCard',18), icPlusW:ic('Plus',18), icVideo:ic('Video',13)
+    };
+  }
+}
+</script>
+</body>
+</html>
