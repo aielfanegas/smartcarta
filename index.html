@@ -24,6 +24,8 @@
   @keyframes scToast{from{transform:translate(-50%,-14px);opacity:0}to{transform:translate(-50%,0);opacity:1}}
   @keyframes scMedia{from{opacity:.35}to{opacity:1}}
   @keyframes scZoom{from{transform:scale(1)}to{transform:scale(1.14)}}
+  @keyframes scTickPop{0%{transform:scale(.3);opacity:0}55%{transform:scale(1.25);opacity:1}100%{transform:scale(1);opacity:1}}
+  @keyframes scSeg{from{transform:scaleX(0)}to{transform:scaleX(1)}}
   ::-webkit-scrollbar{width:0;height:0}
   .scx::-webkit-scrollbar{display:none}
   button:focus-visible,input:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--accent,#127a86);outline-offset:2px}
@@ -127,20 +129,26 @@
               <sc-if value="{{ d.isVideo }}">
                 <div style="position:absolute;top:18px;right:10px;z-index:5;pointer-events:none;display:flex;align-items:center;gap:4px;background:rgba(0,0,0,.42);color:#fff;font-size:9px;font-weight:800;letter-spacing:.06em;padding:3px 7px;border-radius:20px">{{ icVideo }}VIDEO</div>
               </sc-if>
-              <button onClick="{{ d.onPrev }}" aria-label="{{ txt.prevMedia }}" style="position:absolute;left:0;top:0;width:38%;height:100%;z-index:3;background:transparent;border:none;cursor:pointer;-webkit-tap-highlight-color:transparent"></button>
-              <button onClick="{{ d.onNext }}" aria-label="{{ txt.nextMedia }}" style="position:absolute;right:0;top:0;width:62%;height:100%;z-index:3;background:transparent;border:none;cursor:pointer;-webkit-tap-highlight-color:transparent"></button>
-              <div onClick="{{ d.onCard }}" role="button" tabindex="0" aria-label="{{ d.name }}" style="position:absolute;left:0;right:0;bottom:0;z-index:6;padding:12px;cursor:pointer;color:#fff">
+              <button onClick="{{ d.onPrev }}" aria-label="{{ txt.prevMedia }}" style="position:absolute;left:0;top:0;width:38%;height:74%;z-index:3;background:transparent;border:none;cursor:pointer;-webkit-tap-highlight-color:transparent"></button>
+              <button onClick="{{ d.onNext }}" aria-label="{{ txt.nextMedia }}" style="position:absolute;right:0;top:0;width:62%;height:74%;z-index:3;background:transparent;border:none;cursor:pointer;-webkit-tap-highlight-color:transparent"></button>
+              <sc-if value="{{ d.hasMulti }}">
+                <button onClick="{{ d.onPrev }}" aria-label="{{ txt.prevMedia }}" style="position:absolute;left:7px;top:40%;z-index:7;width:30px;height:30px;border-radius:50%;border:1px solid rgba(255,255,255,.35);background:rgba(0,0,0,.34);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);color:#fff;display:grid;place-items:center;cursor:pointer">{{ d.icPrev }}</button>
+                <button onClick="{{ d.onNext }}" aria-label="{{ txt.nextMedia }}" style="position:absolute;right:7px;top:40%;z-index:7;width:30px;height:30px;border-radius:50%;border:1px solid rgba(255,255,255,.35);background:rgba(0,0,0,.34);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);color:#fff;display:grid;place-items:center;cursor:pointer">{{ d.icNext }}</button>
+              </sc-if>
+              <div onClick="{{ d.onCard }}" role="button" tabindex="0" aria-label="{{ d.name }}" style="position:absolute;left:10px;right:10px;bottom:10px;z-index:6;padding:11px 12px;cursor:pointer;color:#fff;border-radius:16px;background:rgba(18,16,13,.36);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.18);box-shadow:0 6px 20px rgba(0,0,0,.3)">
                 <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:7px">
                   <sc-for list="{{ d.dietPillsLite }}" as="p">
-                    <span style="display:inline-flex;align-items:center;gap:3px;background:rgba(0,0,0,.55);border:1px solid rgba(255,255,255,.3);font-size:10px;font-weight:700;padding:3px 8px;border-radius:20px;color:#fff;backdrop-filter:blur(4px);text-shadow:0 1px 2px rgba(0,0,0,.5)">{{ p.icon }}{{ p.label }}</span>
+                    <span style="display:inline-flex;align-items:center;gap:3px;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.25);font-size:10px;font-weight:700;padding:3px 8px;border-radius:20px;color:#fff">{{ p.icon }}{{ p.label }}</span>
                   </sc-for>
                 </div>
-                <div style="font-family:'DM Serif Display',Georgia,serif;font-size:18px;line-height:1.08;letter-spacing:-.01em;text-shadow:0 2px 10px rgba(0,0,0,.7),0 1px 3px rgba(0,0,0,.6)">{{ d.name }}</div>
-                
-                <div style="display:flex;align-items:center;gap:8px;margin-top:10px">
-                  <span style="font-weight:800;font-size:16px;white-space:nowrap;text-shadow:0 2px 8px rgba(0,0,0,.7)">{{ d.priceStr }}</span>
-                  <span style="font-size:11px;opacity:.9;font-weight:600;text-shadow:0 1px 6px rgba(0,0,0,.7)">{{ d.kcalStr }}</span>
-                  <button onClick="{{ d.onAdd }}" aria-label="{{ txt.addAria }}" style="margin-left:auto;width:36px;height:36px;border-radius:12px;border:none;background:var(--accent2,#d4694a);color:#fff;display:grid;place-items:center;cursor:pointer;box-shadow:0 3px 10px rgba(0,0,0,.3)">{{ d.addIcon }}</button>
+                <div style="display:flex;align-items:center;gap:6px">
+                  <div style="font-family:'DM Serif Display',Georgia,serif;font-size:18px;line-height:1.08;letter-spacing:-.01em;flex:1;min-width:0">{{ d.name }}</div>
+                  <span style="flex-shrink:0;opacity:.85;display:inline-flex">{{ icInfoCard }}</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:8px;margin-top:9px">
+                  <span style="font-weight:800;font-size:16px;white-space:nowrap">{{ d.priceStr }}</span>
+                  <span style="font-size:11px;opacity:.9;font-weight:600">{{ d.kcalStr }}</span>
+                  <button onClick="{{ d.onAdd }}" aria-label="{{ txt.addAria }}" style="{{ d.addBtnStyle }}">{{ d.addIcon }}</button>
                 </div>
               </div>
             </div>
@@ -171,7 +179,7 @@
                   <sc-if value="{{ d.compactMeta }}">
                     <span style="font-size:11px;color:var(--muted);font-weight:600;flex:1">{{ d.kcalStr }}</span>
                   </sc-if>
-                  <button onClick="{{ d.onAdd }}" aria-label="{{ txt.addAria }}" style="width:38px;height:38px;border-radius:12px;border:none;background:var(--accent,#127a86);color:var(--accentText,#fff);display:grid;place-items:center;cursor:pointer;flex-shrink:0;box-shadow:0 2px 6px rgba(0,0,0,.1)">{{ d.addIcon }}</button>
+                  <button onClick="{{ d.onAdd }}" aria-label="{{ txt.addAria }}" style="{{ d.addBtnStyle }}">{{ d.addIcon }}</button>
                 </div>
               </div>
             </div>
@@ -372,8 +380,20 @@
   <sc-if value="{{ modal }}">
     <div onClick="{{ closeModal }}" style="position:absolute;inset:0;z-index:50;background:rgba(0,0,0,.5);animation:scIn .2s ease;display:flex;align-items:center;justify-content:center;padding:18px">
       <div onClick="{{ stop }}" role="dialog" aria-modal="true" aria-label="{{ modal.name }}" style="background:var(--surface,#fff);border-radius:22px;overflow:hidden;width:100%;max-width:460px;max-height:90%;display:flex;flex-direction:column;animation:scPop .26s cubic-bezier(.2,.8,.2,1)">
-        <div style="{{ modal.imgStyle }}">
-          <button onClick="{{ closeModal }}" aria-label="{{ txt.closeAria }}" style="position:absolute;top:12px;right:12px;width:38px;height:38px;border-radius:50%;border:none;background:rgba(255,255,255,.92);color:#2a2722;display:grid;place-items:center;cursor:pointer">{{ icX }}</button>
+        <div style="{{ modal.galleryStyle }}">
+          {{ modal.mediaEl }}
+          <div style="position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,rgba(0,0,0,.3) 0%,rgba(0,0,0,0) 22%)"></div>
+          <sc-if value="{{ modal.hasMulti }}">
+            <div style="position:absolute;top:10px;left:12px;right:60px;display:flex;gap:4px;z-index:3;pointer-events:none">
+              <sc-for list="{{ modal.segments }}" as="s"><div style="{{ s.style }}"></div></sc-for>
+            </div>
+            <button onClick="{{ modal.onPrev }}" aria-label="{{ txt.prevMedia }}" style="position:absolute;left:10px;top:50%;transform:translateY(-50%);z-index:4;width:34px;height:34px;border-radius:50%;border:1px solid rgba(255,255,255,.4);background:rgba(0,0,0,.36);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);color:#fff;display:grid;place-items:center;cursor:pointer">{{ modal.icPrev }}</button>
+            <button onClick="{{ modal.onNext }}" aria-label="{{ txt.nextMedia }}" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);z-index:4;width:34px;height:34px;border-radius:50%;border:1px solid rgba(255,255,255,.4);background:rgba(0,0,0,.36);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);color:#fff;display:grid;place-items:center;cursor:pointer">{{ modal.icNext }}</button>
+          </sc-if>
+          <sc-if value="{{ modal.isVideo }}">
+            <div style="position:absolute;top:14px;left:14px;z-index:4;pointer-events:none;display:flex;align-items:center;gap:4px;background:rgba(0,0,0,.45);color:#fff;font-size:9px;font-weight:800;letter-spacing:.06em;padding:3px 7px;border-radius:20px">{{ icVideo }}VIDEO</div>
+          </sc-if>
+          <button onClick="{{ closeModal }}" aria-label="{{ txt.closeAria }}" style="position:absolute;top:12px;right:12px;z-index:5;width:38px;height:38px;border-radius:50%;border:none;background:rgba(255,255,255,.92);color:#2a2722;display:grid;place-items:center;cursor:pointer">{{ icX }}</button>
         </div>
         <div class="scx" style="overflow-y:auto;padding:18px">
           <div style="display:flex;align-items:flex-start;gap:10px">
@@ -559,6 +579,8 @@ class Component extends DCLogic {
       {id:'b6',cat:'bebidas',n:{es:'Tinto de verano',en:'Tinto de verano'},d:{es:'Vino tinto con gaseosa de limón y hielo. Refrescante.',en:'Red wine with lemon soda and ice.'},p:5.0,img:'12751793',k:150,pr:0,c:18,f:0,alg:['sulphites'],diet:['vegan','glutenfree','lactosefree']},
       {id:'c7',cat:'cocteles',n:{es:'Negroni',en:'Negroni'},d:{es:'Ginebra, vermut rojo y bitter con piel de naranja.',en:'Gin, red vermouth and bitter with orange peel.'},p:9.5,img:'16985162',k:210,pr:0,c:14,f:0,alg:['sulphites'],diet:['vegan','glutenfree','lactosefree']}
     ];
+    // platos con clip de "vídeo" (demo: imagen con zoom; para .mp4 reales ver buildMediaEl)
+    this.VIDS = { e1:true, m1:true, m4:true, m5:true, d2:true, b3:true };
     this._byId = {};
     this._dishes.forEach(d=>{ this._byId[d.id]=d; });
     this.state = {
@@ -568,7 +590,7 @@ class Component extends DCLogic {
       cart:{}, cartOpen:false, orderConfirmed:false,
       modal:null, chatOpen:false, settingsOpen:false,
       chat:[{role:'bot', key:'greet'}], chatInput:'', toast:null,
-      story:{}, cols:2, fab:null,
+      story:{}, cols:2, fab:null, addedId:null, modalIdx:0,
       cartStep:1, delivery:'table', tableNo:'', special:'', custName:'', custEmail:'', custPhone:'',
       currency:'EUR', currencyOpen:false
     };
@@ -580,7 +602,22 @@ class Component extends DCLogic {
     this._onResize = ()=>this.measureCols();
     window.addEventListener('resize', this._onResize);
     if(!window.lucide){ this._li = setInterval(()=>{ if(window.lucide){ clearInterval(this._li); this.forceUpdate(); } }, 80); }
+    // autoplay escalonado: una tarjeta avanza por tick (nunca todas a la vez)
+    this._autoI = 0;
+    this._auto = setInterval(()=>this.autoTick(), 1200);
   }
+  autoTick(){
+    const S=this.state;
+    if(S.modal || S.cartOpen || S.chatOpen || S.settingsOpen) return;
+    const ids = this._visibleStoryIds || [];
+    if(!ids.length) return;
+    const id = ids[this._autoI % ids.length];
+    this._autoI++;
+    const len = this.mediaLen(id);
+    if(len <= 1) return;
+    this.setState(s=>{ const st=Object.assign({},s.story); st[id]=(((st[id]||0)+1)%len); return {story:st}; });
+  }
+  mediaLen(id){ return 3 + ((this.VIDS && this.VIDS[id]) ? 1 : 0); }
   componentDidUpdate(prev){
     this.applyTheme();
     this.measureCols();
@@ -588,7 +625,7 @@ class Component extends DCLogic {
       const el = this.chatScrollRef.current; el.scrollTop = el.scrollHeight;
     }
   }
-  componentWillUnmount(){ clearInterval(this._li); clearTimeout(this._tt); if(this._onResize) window.removeEventListener('resize', this._onResize); }
+  componentWillUnmount(){ clearInterval(this._li); clearInterval(this._auto); clearTimeout(this._tt); clearTimeout(this._at); if(this._onResize) window.removeEventListener('resize', this._onResize); }
   measureCols(){
     const el = this.gridRef.current; if(!el) return;
     const w = el.getBoundingClientRect().width;
@@ -682,13 +719,15 @@ class Component extends DCLogic {
   showToast(msg){ clearTimeout(this._tt); this.setState({toast:msg}); this._tt = setTimeout(()=>this.setState({toast:null}), 2600); }
   toggleDiet(k){ this.setState(s=>({diets: s.diets.includes(k) ? s.diets.filter(x=>x!==k) : s.diets.concat(k)})); }
   toggleAllergen(k){ this.setState(s=>({excluded: s.excluded.includes(k) ? s.excluded.filter(x=>x!==k) : s.excluded.concat(k)})); }
-  addToCart(id){ this.setState(s=>{ const c=Object.assign({},s.cart); c[id]=(c[id]||0)+1; return {cart:c}; }); this.showToast(this.T()[this.state.lang].added); }
+  addToCart(id){ this.setState(s=>{ const c=Object.assign({},s.cart); c[id]=(c[id]||0)+1; return {cart:c, addedId:id}; }); this.showToast(this.T()[this.state.lang].added); clearTimeout(this._at); this._at=setTimeout(()=>this.setState({addedId:null}),1300); }
   inc(id){ this.setState(s=>{ const c=Object.assign({},s.cart); c[id]=(c[id]||0)+1; return {cart:c}; }); }
   dec(id){ this.setState(s=>{ const c=Object.assign({},s.cart); c[id]=(c[id]||0)-1; if(c[id]<=0) delete c[id]; return {cart:c}; }); }
   pay(){ const n=Object.keys(this.state.cart).length; if(!n) return; this.setState({orderConfirmed:true}); }
   newOrder(){ this.setState({cart:{}, orderConfirmed:false, cartOpen:false, cartStep:1, tableNo:'', special:'', custName:'', custEmail:'', custPhone:''}); }
   createOrder(){ const S=this.state, T=this.T()[S.lang]; if(!S.custName.trim() || !S.custEmail.trim() || (S.delivery==='table' && !S.tableNo.trim())){ this.showToast(T.reqMissing); return; } this.setState({orderConfirmed:true}); }
-  openModal(id){ this.setState({modal:id}); }
+  openModal(id){ this.setState(s=>({modal:id, modalIdx: s.story[id]||0})); }
+  modalNext(){ const id=this.state.modal; if(!id) return; const len=this.mediaLen(id); this.setState(s=>({modalIdx:(s.modalIdx+1)%len})); }
+  modalPrev(){ const id=this.state.modal; if(!id) return; const len=this.mediaLen(id); this.setState(s=>({modalIdx:(s.modalIdx-1+len)%len})); }
 
   matchIntent(text){ const q=(text||'').toLowerCase();
     if(/celi|celí|coeli|glut/.test(q)) return 'glutenfree';
@@ -750,7 +789,7 @@ class Component extends DCLogic {
       : {display:'flex', flexDirection:'column', gap:'12px'};
     const pool = this._dishes.map(x=>x.img);
     // To use real clips, set a dish id to an .mp4 URL string and restore a <video> in buildMediaEl.
-    const VIDS = { e1:true, m1:true, m4:true, m5:true, d2:true, b3:true };
+    const VIDS = this.VIDS;
     const mediaFor=(d,i)=>{ const a=[{type:'img',url:imgUrl(d.img)}]; if(VIDS[d.id]) a.push({type:'video',url:imgUrl(pool[(i*2+9)%pool.length])}); a.push({type:'img',url:imgUrl(pool[(i*3+5)%pool.length])}); a.push({type:'img',url:imgUrl(pool[(i*7+2)%pool.length])}); return a; };
     const buildMediaEl=(m,idx)=>{ const anim={animation: m.type==='video' ? 'scMedia .4s ease, scZoom 7s ease-in-out infinite alternate' : 'scMedia .4s ease', transformOrigin:'center center'};
       return React.createElement('div',{key:(m.type==='video'?'v':'i')+idx,style:Object.assign({position:'absolute',inset:0},imgBg(m.url),anim)}); };
@@ -758,7 +797,10 @@ class Component extends DCLogic {
       const base = { id:d.id, name:d.n[lang], desc:d.d[lang], priceStr:fmt(d.p), kcalStr:kcal(d),
         dietPills: dietPillsFor(d),
         flameOrDot: d.diet.includes('spicy') ? this.icon('Flame',{width:12,height:12}) : null,
-        addIcon: this.icon('Plus',{width:18,height:18}),
+        added: S.addedId===d.id,
+        addIcon: (S.addedId===d.id)
+          ? React.createElement('span',{style:{display:'grid',placeItems:'center',animation:'scTickPop .42s cubic-bezier(.2,.9,.3,1.5)'}}, this.icon('Check',{width:20,height:20}))
+          : this.icon('Plus',{width:18,height:18}),
         isStory:isGrid, isPlain:!isGrid,
         onCard: ()=>this.openModal(d.id),
         onAdd: (e)=>{ if(e&&e.stopPropagation) e.stopPropagation(); this.addToCart(d.id); } };
@@ -772,14 +814,20 @@ class Component extends DCLogic {
         base.dietPillsLite = d.diet.slice(0,2).map(k=>({key:k,label:dietLabel(k),icon:this.icon(this.DIETS[k].ic,{width:11,height:11})}));
         base.onPrev = (e)=>{ if(e&&e.stopPropagation) e.stopPropagation(); this.prevMedia(d.id,len); };
         base.onNext = (e)=>{ if(e&&e.stopPropagation) e.stopPropagation(); this.nextMedia(d.id,len); };
+        base.icPrev = this.icon('ChevronLeft',{width:20,height:20});
+        base.icNext = this.icon('ChevronRight',{width:20,height:20});
+        base.hasMulti = len>1;
+        base.addBtnStyle = 'margin-left:auto;width:36px;height:36px;border-radius:12px;border:none;display:grid;place-items:center;cursor:pointer;box-shadow:0 3px 10px rgba(0,0,0,.3);color:#fff;transition:background .2s,transform .15s;'+(base.added?'background:#2e9e6a;transform:scale(1.08)':'background:var(--accent2,#d4694a)');
       } else {
         base.cardStyle = cardStyle;
         base.imgStyle = Object.assign({}, imgDims, imgBg(imgUrl(d.img)));
         base.bodyStyle = bodyStyle;
         base.showImg = L!=='compact'; base.showDesc = L==='cards'; base.showPills = L!=='compact'; base.compactMeta = L==='compact';
+        base.addBtnStyle = 'width:38px;height:38px;border-radius:12px;border:none;display:grid;place-items:center;cursor:pointer;flex-shrink:0;box-shadow:0 2px 6px rgba(0,0,0,.1);color:var(--accentText,#fff);transition:background .2s,transform .15s;'+(base.added?'background:#2e9e6a;transform:scale(1.08)':'background:var(--accent,#127a86)');
       }
       return base;
     });
+    this._visibleStoryIds = isGrid ? visibleDishes.map(v=>v.id) : [];
 
     const categories = this.CATS.map(c=>{
       const active = S.cat===c.key;
@@ -837,7 +885,15 @@ class Component extends DCLogic {
     // modal
     let modal=null;
     if(S.modal){ const d=this._byId[S.modal];
-      modal = { name:d.n[lang], desc:d.d[lang], imgStyle: Object.assign({position:'relative',height:'200px',flexShrink:0}, imgBg(imgUrl(d.img))), priceStr:fmt(d.p), kcalStr:kcal(d),
+      const di=this._dishes.indexOf(d); const mMedia=mediaFor(d, di<0?0:di); const mLen=mMedia.length;
+      const mIdx=Math.min(S.modalIdx||0, mLen-1); const mCur=mMedia[mIdx];
+      modal = { name:d.n[lang], desc:d.d[lang], priceStr:fmt(d.p), kcalStr:kcal(d),
+        galleryStyle:{position:'relative',height:'240px',flexShrink:0,overflow:'hidden',background:'#0c0c0c'},
+        mediaEl: buildMediaEl(mCur, mIdx),
+        segments: mMedia.map((mm,j)=>({style:{flex:1,height:'3px',borderRadius:'2px',background:j<=mIdx?'rgba(255,255,255,.96)':'rgba(255,255,255,.4)',transition:'background .2s'}})),
+        isVideo: mCur.type==='video', hasMulti: mLen>1,
+        onPrev:()=>this.modalPrev(), onNext:()=>this.modalNext(),
+        icPrev:this.icon('ChevronLeft',{width:22,height:22}), icNext:this.icon('ChevronRight',{width:22,height:22}),
         dietPills: dietPillsFor(d), hasDiets:d.diet.length>0,
         macros:[{label:T.protein,val:d.pr+' g'},{label:T.carbs,val:d.c+' g'},{label:T.fat,val:d.f+' g'}],
         allergens:d.alg.map(k=>({label:algLabel(k)})), hasAllergens:d.alg.length>0, noAllergens:d.alg.length===0,
@@ -931,7 +987,7 @@ class Component extends DCLogic {
       icX:ic('X',18), icShield:ic('ShieldAlert',17), icChevron:ic('ChevronDown',17),
       icCart:ic('ShoppingCart',22), icCartBig:ic('ShoppingCart',26), icSpark:ic('Sparkles',18), icSpark2:ic('Sparkles',14),
       icBell:ic('Bell',20), icReceipt:ic('ReceiptText',20), icSend:ic('Send',18), icCheck:ic('Check',15), icCheckBig:ic('CircleCheck',46),
-      icClock:ic('Clock',18), icMap:ic('MapPin',18), icInsta:ic('Instagram',18), icCard:ic('CreditCard',18), icPlusW:ic('Plus',18), icVideo:ic('Video',13)
+      icClock:ic('Clock',18), icMap:ic('MapPin',18), icInsta:ic('Instagram',18), icCard:ic('CreditCard',18), icPlusW:ic('Plus',18), icVideo:ic('Video',13), icInfoCard:ic('Maximize2',15)
     };
   }
 }
